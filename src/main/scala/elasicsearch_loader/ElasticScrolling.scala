@@ -36,12 +36,14 @@ trait ElasticScrolling extends HttpRequester with Protocols {
   }
 
   def getNextSet(scrollId: ScrollId): Future[ScrollResponse] = {
-    val data = s"""{"scroll": "1m","scroll_id": $scrollId}"""
+    val data = s"""{"scroll": "1m","scroll_id": "$scrollId"}"""
     val request = RequestBuilding.Get(s"/_search/scroll/", entity = HttpEntity(ContentTypes.`application/json`, data))
     val futureRes = futureHttpResponse(request, settings.elasti.host, settings.elasti.port)
     futureRes.flatMap{
       case HttpResponse(StatusCodes.OK, _, entity, _) => Unmarshal(entity).to[ScrollResponse]
-      case HttpResponse(code, _, entity, _) => Future.failed(IllegalResponseException(s"status: $code"))
+      case HttpResponse(code, _, entity, _) =>
+        entity.dataBytes.runForeach(bytes => println(bytes.decodeString("UTF-8")))
+        Future.failed(IllegalResponseException(s"status: $code"))
     }
   }
 

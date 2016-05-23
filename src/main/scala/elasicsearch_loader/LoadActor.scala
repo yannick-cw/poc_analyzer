@@ -29,19 +29,23 @@ class LoadActor extends Actor with ElasticScrolling {
   def receive: Receive = {
     case StartImport(index, docType) =>
       val futureScrollId = initScrollScan(index, docType)
-      val scrollId = Await.result(futureScrollId, 10 seconds)
+      val scrollId = Await.result(futureScrollId, 2 seconds)
+      println(scrollId)
 
       @tailrec
       def go(id: ScrollId, acc: List[CleanedDoc]): List[CleanedDoc] = {
-        val result: ScrollResponse = Await.result(getNextSet(id), 10 seconds)
+        val result: ScrollResponse = Await.result(getNextSet(id), 20 seconds)
         val newDocs = result.hits.hits.map(_._source)
         if (newDocs.isEmpty) acc
         else go(result._scroll_id, acc ++ newDocs)
       }
 
       val docs = go(scrollId, List.empty[CleanedDoc])
-
-      docs.foreach(println)
   }
 
+}
+
+object Tester extends App {
+  val actor = ActorSystem().actorOf(LoadActor.props)
+  actor ! StartImport()
 }
