@@ -18,11 +18,17 @@ class BayesModel(classes: Class*) {
 
   val probabilityPerClass = classes.map(doc => doc.size.toDouble / classes.flatten.size.toDouble)
   val vocabularySize = classes.flatten.flatten.distinct.size.toDouble
-  val perClassWordAppearance = classes.map(c => (c.flatten.size ,c.flatten.groupBy(s => s).map(tuple => (tuple._1, tuple._2.size.toDouble))))
+  println("vocabulary " + vocabularySize)
+  val wordsPerClass = classes.map(_.flatten.size)
+  println("words per class " + wordsPerClass)
+
+  //todo out of memory here
+  val perClassWordAppearance = classes.map(c => c.flatten.groupBy(s => s).map(tuple => (tuple._1, tuple._2.size.toDouble)))
+  println("done")
 
   def classify(inputText: List[String]): Seq[Double] = {
 
-    val classWise = perClassWordAppearance.map { m => inputText.map{word => (m._2.getOrElse(word, 0.0) + 1.0) / (m._1 + vocabularySize)} }
+    val classWise = wordsPerClass.zip(perClassWordAppearance).map { m => inputText.map{ word => (m._2.getOrElse(word, 0.0) + 1.0) / (m._1 + vocabularySize)} }
     classWise.map(_.product).zip(probabilityPerClass).map(tuple => tuple._1 * tuple._2)
   }
 }

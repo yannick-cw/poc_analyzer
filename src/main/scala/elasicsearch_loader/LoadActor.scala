@@ -45,7 +45,9 @@ class LoadActor(master: ActorRef) extends Actor with ElasticScrolling {
       val futureDocs = go(scrollId, List.empty[CleanedDoc])
 
       futureDocs.onSuccess{
-        case docs => master ! FinishedImport(index.getOrElse("all"), docType.getOrElse("all"), docs)
+        case docs =>
+          println(s"imported ${docs.size} docs")
+          master ! FinishedImport(index.getOrElse("all"), docType.getOrElse("all"), docs)
       }
 
       futureDocs.onFailure{
