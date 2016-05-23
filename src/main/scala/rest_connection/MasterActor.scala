@@ -25,8 +25,7 @@ class MasterActor extends Actor {
 
   def waitingForElasticData: Receive = {
     case finishedImport: FinishedImport => bayesActor ! finishedImport
-    case ModelFinished =>
-      context become acceptingTestData
+    case ModelFinished => context become acceptingTestData
   }
 
   def acceptingTestData: Receive = {

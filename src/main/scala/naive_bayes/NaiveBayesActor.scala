@@ -21,11 +21,11 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
   def receive = modelBuilding
 
   def modelBuilding: Receive = {
-    case FinishedImport(_, _, docs) =>
-      val (democrats, republican) = docs.partition(_.src == "democrats")
+    case FinishedImport(_, _, hits) =>
+      val (democrats, republican) = hits.partition(_._index == "dem")
       val getWords: (CleanedDoc => List[String]) = doc => doc.cleanedText.split(" ").toList
 
-      val model = BayesModel(republican.map(getWords), democrats.map(getWords))
+      val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
 
       master ! ModelFinished
       context become waitingForTestData(model)
