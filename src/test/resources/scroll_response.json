@@ -1,0 +1,37 @@
+{
+  "_scroll_id" : "c2Nhbjs1OzkxOnpETUJ4UlplU0JleUN1QkI4WElPR0E7OTI6ekRNQnhSWmVTQmV5Q3VCQjhYSU9HQTs5NDp6RE1CeFJaZVNCZXlDdUJCOFhJT0dBOzkzOnpETUJ4UlplU0JleUN1QkI4WElPR0E7OTU6ekRNQnhSWmVTQmV5Q3VCQjhYSU9HQTsxO3RvdGFsX2hpdHM6MTgwOTY0Ow==",
+  "took" : 1,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 5,
+    "successful" : 5,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : 180964,
+    "max_score" : 0.0,
+    "hits" : [ {
+      "_index" : "rep",
+      "_type" : "republican",
+      "_id" : "AVTKctX1bsTHgNn2oYXD",
+      "_score" : 0.0,
+      "_source" : {
+        "src" : "Republican",
+        "ups" : 1,
+        "rawText" : "I would upvote this a thousand times if I could",
+        "cleanedText" : "i upvot thousand time i"
+      }
+    }, {
+      "_index" : "rep",
+      "_type" : "republican",
+      "_id" : "AVTKctX1bsTHgNn2oYXF",
+      "_score" : 0.0,
+      "_source" : {
+        "src" : "Republican",
+        "ups" : 2,
+        "rawText" : "Here is what history will need to forget:\\n\\n* The Patriot Act\\n\\n* No Child Left Behind\\n\\n* Iraq\\n\\n* Hurricane Katrina",
+        "cleanedText" : "histori need forgetnn patriot actnn child left behindnn iraqnn hurrican katrina"
+      }
+    } ]
+  }
+}
