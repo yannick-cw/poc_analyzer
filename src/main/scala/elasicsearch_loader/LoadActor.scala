@@ -8,7 +8,8 @@ import util.Settings
 
 import scala.annotation.tailrec
 import scala.concurrent.duration._
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by Yannick on 23.05.16.
@@ -32,12 +33,14 @@ class LoadActor extends Actor with ElasticScrolling {
       val scrollId = Await.result(futureScrollId, 2 seconds)
       println(scrollId)
 
-      @tailrec
-      def go(id: ScrollId, acc: List[CleanedDoc]): List[CleanedDoc] = {
-        val result: ScrollResponse = Await.result(getNextSet(id), 20 seconds)
-        val newDocs = result.hits.hits.map(_._source)
-        if (newDocs.isEmpty) acc
-        else go(result._scroll_id, acc ++ newDocs)
+      def go(id: ScrollId, acc: List[CleanedDoc]): Future[List[CleanedDoc]] = {
+        val scrollSet: Future[ScrollResponse] = getNextSet(id)
+        scrollSet.flatMap { scroll =>
+          val currentId = scroll._scroll_id
+          val docs = scroll.hits.hits.map(_._source)
+          if(docs.isEmpty) Future(acc)
+          else go(currentId, acc ++ docs)
+        }
       }
 
       val docs = go(scrollId, List.empty[CleanedDoc])
