@@ -62,6 +62,6 @@ object AkkaHttpMicroservice extends App with Service {
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
   master ! StartImport()
-
+//  master ! ValidateAlgoRoute(10)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }

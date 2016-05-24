@@ -49,9 +49,10 @@ class MasterActor extends Actor {
     case ClassificationResult(rep, dem) =>
       if(testData.nonEmpty) {
         bayesActor ! TestInput(testData.head._source.cleanedText.split(" +").toList)
-        context become verifyingAlgo(testDataPercentage, testData.tail, (lastElement._index, lastElement._source.cleanedText, if ((rep >= dem && lastElement._id == "rep") || (dem > rep && lastElement._id == "dem")) true else false) +: result, testData.head)
+        context become verifyingAlgo(testDataPercentage, testData.tail, (lastElement._index, lastElement._source.cleanedText, if ((rep >= dem && lastElement._index == "rep") || (dem > rep && lastElement._index == "dem")) true else false) +: result, testData.head)
       } else {
-        result.foreach(println)
+        result.filter(_._3 == false).foreach(println)
+        println(result.map(_._3).groupBy(identity).mapValues(_.size))
       }
   }
 
