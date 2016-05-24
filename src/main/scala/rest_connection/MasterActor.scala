@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorSystem, Props}
 import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import naive_bayes.NaiveBayesActor
-import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
+import naive_bayes.NaiveBayesActor.{ClassificationResult, BayesModelFinished, TestInput}
 
 /**
   * Created by Yannick on 23.05.16.
@@ -25,17 +25,14 @@ class MasterActor extends Actor {
 
   def waitingForElasticData: Receive = {
     case finishedImport: FinishedImport => bayesActor ! finishedImport
-    case ModelFinished => context become acceptingTestData
+    case BayesModelFinished => context become acceptingTestData
   }
 
   def acceptingTestData: Receive = {
     case testInput: TestInput => bayesActor ! testInput
-    case ClassificationResult(a,b) => println(s"rep: $a, dem: $b")
+    case res@ClassificationResult(a,b) =>
+      println(s"rep: $a, dem: $b")
+      sender ! res
   }
 
-}
-
-object Test extends App {
-  val system = ActorSystem()
-  system.actorOf(MasterActor.props) ! StartImport()
 }

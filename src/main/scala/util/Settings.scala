@@ -10,6 +10,11 @@ class Settings(system: ActorSystem) {
     val host = system.settings.config.getString("akka.elasticsearch.host")
     val port = system.settings.config.getInt("akka.elasticsearch.port")
   }
+
+  object cleaning {
+    val host = system.settings.config.getString("akka.cleaning.host")
+    val port = system.settings.config.getInt("akka.cleaning.port")
+  }
 }
 
 object Settings {

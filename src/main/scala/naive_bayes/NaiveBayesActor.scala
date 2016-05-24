@@ -3,7 +3,7 @@ package naive_bayes
 import akka.actor.{Actor, ActorRef, Props}
 import elasicsearch_loader.LoadActor.FinishedImport
 import elasicsearch_loader.Queries.CleanedDoc
-import naive_bayes.NaiveBayesActor.{ClassificationResult, DocsToModel, ModelFinished, TestInput}
+import naive_bayes.NaiveBayesActor.{ClassificationResult, DocsToModel, BayesModelFinished, TestInput}
 
 /**
   * Created by Yannick on 23.05.16.
@@ -13,7 +13,7 @@ object NaiveBayesActor {
   case class DocsToModel(docs: List[CleanedDoc])
   case class TestInput(textList: List[String])
   case class ClassificationResult(repProb: Double, demProb: Double)
-  case object ModelFinished
+  case object BayesModelFinished
 }
 
 class NaiveBayesActor(master: ActorRef) extends Actor {
@@ -27,7 +27,7 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
 
       val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
 
-      master ! ModelFinished
+      master ! BayesModelFinished
       context become waitingForTestData(model)
   }
 

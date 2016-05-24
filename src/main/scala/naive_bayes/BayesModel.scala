@@ -32,7 +32,7 @@ class BayesModel(classes: Class*) {
     .groupBy(identity)
     .mapValues(_.length.toDouble)
 
-  // danger of out of memory here
+  // danger of out of memory here, possibly filter with appearance less than 2
   private val perClassWordAppearance = classes.map(getPerWordCount)
   println("done with model")
 
