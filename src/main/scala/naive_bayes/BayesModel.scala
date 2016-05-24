@@ -30,7 +30,7 @@ class BayesModel(classes: Class*) {
     _class
     .flatten
     .groupBy(identity)
-    .map{ case (word, words) => (word, words.size.toDouble) }
+    .mapValues(_.length.toDouble)
 
   // danger of out of memory here
   private val perClassWordAppearance = classes.map(getPerWordCount)
