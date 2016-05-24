@@ -13,8 +13,8 @@ import util.{HttpRequester, Protocols, Settings}
 import spray.json._
 import akka.pattern.ask
 import naive_bayes.NaiveBayesActor.{ClassificationResult, TestInput}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 case class ClassifyRequest(algorithm: String, text: String)
