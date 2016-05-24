@@ -1,10 +1,10 @@
 package rest_connection
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import naive_bayes.NaiveBayesActor
-import naive_bayes.NaiveBayesActor.{ClassificationResult, BayesModelFinished, TestInput}
+import naive_bayes.NaiveBayesActor.{BayesModelFinished, ClassificationResult, TestInput}
 
 /**
   * Created by Yannick on 23.05.16.
@@ -25,14 +25,16 @@ class MasterActor extends Actor {
 
   def waitingForElasticData: Receive = {
     case finishedImport: FinishedImport => bayesActor ! finishedImport
-    case BayesModelFinished => context become acceptingTestData
+    case BayesModelFinished => context become acceptingTestData(self)
   }
 
-  def acceptingTestData: Receive = {
-    case testInput: TestInput => bayesActor ! testInput
+  def acceptingTestData(requester: ActorRef): Receive = {
+    case testInput: TestInput =>
+      bayesActor ! testInput
+      context become acceptingTestData(sender)
     case res@ClassificationResult(a,b) =>
       println(s"rep: $a, dem: $b")
-      sender ! res
+      requester ! res
   }
 
 }

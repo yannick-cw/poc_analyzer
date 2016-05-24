@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 
 case class ClassifyRequest(algorithm: String, text: String)
 case class RawText(text: String)
-case class CleanedText(text: List[String])
+case class CleanedText(cleanedText: List[String])
 
 trait Service extends Protocols with HttpRequester {
   implicit val system: ActorSystem
@@ -36,7 +36,7 @@ trait Service extends Protocols with HttpRequester {
 
         val classifyResult = for {
           cleanedText <- futureCleaningRes
-          testInput <- Unmarshal(cleanedText).to[CleanedText].map(ct => TestInput(ct.text))
+          testInput <- Unmarshal(cleanedText).to[CleanedText].map(ct => TestInput(ct.cleanedText))
           classResult <- master.ask(testInput)(2 seconds)
         } yield classResult
 
