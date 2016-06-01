@@ -51,8 +51,9 @@ class MasterActor extends Actor {
         bayesActor ! TestInput(testData.head._source.cleanedText.split(" +").toList)
         context become verifyingAlgo(testDataPercentage, testData.tail, (lastElement._index, lastElement._source.cleanedText, if ((rep >= dem && lastElement._index == "rep") || (dem > rep && lastElement._index == "dem")) true else false) +: result, testData.head)
       } else {
-        result.filter(_._3 == false).foreach(println)
-        println(result.map(_._3).groupBy(identity).mapValues(_.size))
+        val resFalseTrue = result.map(_._3).groupBy(identity).mapValues(_.size)
+        println(resFalseTrue)
+        println("correct classified: " + resFalseTrue(false).toDouble / (resFalseTrue(true).toDouble + resFalseTrue(false).toDouble))
       }
   }
 

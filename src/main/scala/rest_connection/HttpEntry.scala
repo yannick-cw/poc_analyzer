@@ -13,6 +13,7 @@ import util.{HttpRequester, Protocols, Settings}
 import spray.json._
 import akka.pattern.ask
 import naive_bayes.NaiveBayesActor.{ClassificationResult, TestInput}
+import rest_connection.MasterActor.ValidateAlgoRoute
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -61,7 +62,7 @@ object AkkaHttpMicroservice extends App with Service {
 
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
-  master ! StartImport()
-//  master ! ValidateAlgoRoute(10)
+//  master ! StartImport()
+  master ! ValidateAlgoRoute(10)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }
