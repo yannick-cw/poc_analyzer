@@ -23,6 +23,7 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
   def modelBuilding: Receive = {
     case FinishedImport(_, _, hits) =>
       val (democrats, republican) = hits.partition(_._index == "dem")
+
       val getWords: (CleanedDoc => List[String]) = doc => doc.cleanedText.split(" ").toList
 
       val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))

@@ -1,8 +1,10 @@
 package rest_connection
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -19,6 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 case class ClassifyRequest(algorithm: String, text: String)
+case class ClassifyResult(algorithm: String, rep: Double, dem: Double)
 case class RawText(text: String)
 case class CleanedText(cleanedText: List[String])
 
@@ -31,6 +34,8 @@ trait Service extends Protocols with HttpRequester {
   val classify = path("classify") {
       (post & entity(as[ClassifyRequest])) { request =>
 
+        implicit val timeout = Timeout(5.seconds)
+
         val rawText = RawText(request.text)
         val req = RequestBuilding.Post("/clean", entity = HttpEntity(ContentTypes.`application/json`, rawText.toJson.compactPrint))
         val futureCleaningRes = futureHttpResponse(req ,settings.cleaning.host, settings.cleaning.port)
@@ -41,16 +46,22 @@ trait Service extends Protocols with HttpRequester {
           classResult <- master.ask(testInput)(2 seconds)
         } yield classResult
 
-        classifyResult.mapTo[ClassificationResult].foreach{ res =>
-          println(s"rep: ${res.repProb}, dem: ${res.demProb}")
+
+        complete {
+          classifyResult.map[ToResponseMarshallable] {
+            case ClassificationResult(rep, dem) => ClassifyResult(request.algorithm, rep, dem).toJson
+          }
         }
 
-        classifyResult.onFailure{
-          case ex => ex.printStackTrace()
-        }
+//        classifyResult.mapTo[ClassificationResult].foreach{ res =>
+//          println(s"rep: ${res.repProb}, dem: ${res.demProb}")
+//        }
+//
+//        classifyResult.onFailure{
+//          case ex => ex.printStackTrace()
+//        }
 
-        implicit val timeout = Timeout(5.seconds)
-        complete("Wow")
+
       }
     }
 }
@@ -62,7 +73,7 @@ object AkkaHttpMicroservice extends App with Service {
 
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
-//  master ! StartImport()
-  master ! ValidateAlgoRoute(10)
+  master ! StartImport()
+//  master ! ValidateAlgoRoute(10)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }

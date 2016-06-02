@@ -38,7 +38,7 @@ class MasterActor extends Actor {
 
   def verifyingAlgo(testDataPercentage: Int, testData: List[Hit], result: List[(String, String, Boolean)], lastElement: Hit): Receive = {
     case finishedImport: FinishedImport =>
-      val (test, train) = shuffle(finishedImport.hits).splitAt(finishedImport.hits.size * testDataPercentage / 100)
+      val (test, train) = shuffle(finishedImport.hits.filter(_._source.ups >= 10)).splitAt(finishedImport.hits.size * testDataPercentage / 100)
       bayesActor ! FinishedImport("","", train)
       context become verifyingAlgo(testDataPercentage, test, List.empty[(String, String, Boolean)], null)
 
@@ -49,11 +49,13 @@ class MasterActor extends Actor {
     case ClassificationResult(rep, dem) =>
       if(testData.nonEmpty) {
         bayesActor ! TestInput(testData.head._source.cleanedText.split(" +").toList)
-        context become verifyingAlgo(testDataPercentage, testData.tail, (lastElement._index, lastElement._source.cleanedText, if ((rep >= dem && lastElement._index == "rep") || (dem > rep && lastElement._index == "dem")) true else false) +: result, testData.head)
+        context become verifyingAlgo(testDataPercentage, testData.tail, (lastElement._index, lastElement._source.cleanedText, (rep >= dem && lastElement._index == "rep") || (dem > rep && lastElement._index == "dem")) :: result, testData.head)
       } else {
         val resFalseTrue = result.map(_._3).groupBy(identity).mapValues(_.size)
         println(resFalseTrue)
-        println("correct classified: " + resFalseTrue(false).toDouble / (resFalseTrue(true).toDouble + resFalseTrue(false).toDouble))
+        println("correct classified: " + (resFalseTrue(true).toDouble / (resFalseTrue(true).toDouble + resFalseTrue(false).toDouble)) * 100 + "%")
+        val demRepFalse = result.groupBy(_._1).mapValues(_.map(_._3).count(_ == false))
+        println(s"wrong dems: ${demRepFalse("dem")} and wrong reps: ${demRepFalse("rep")}")
       }
   }
 

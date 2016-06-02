@@ -2,7 +2,7 @@ package util
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import elasicsearch_loader.Queries._
-import rest_connection.{ClassifyRequest, CleanedText, RawText}
+import rest_connection.{ClassifyRequest, ClassifyResult, CleanedText, RawText}
 import spray.json.DefaultJsonProtocol
 
 trait Protocols extends DefaultJsonProtocol with SprayJsonSupport {
@@ -14,4 +14,5 @@ trait Protocols extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val scrollResponseForm = jsonFormat5(ScrollResponse.apply)
   implicit val rawTextForm = jsonFormat1(RawText.apply)
   implicit val cleanedTextForm = jsonFormat1(CleanedText.apply)
+  implicit val classifyResultForm = jsonFormat3(ClassifyResult.apply)
 }
