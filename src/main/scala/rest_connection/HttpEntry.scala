@@ -16,6 +16,7 @@ import spray.json._
 import akka.pattern.ask
 import naive_bayes.NaiveBayesActor.{ClassificationResult, TestInput}
 import rest_connection.MasterActor.ValidateAlgoRoute
+import rest_connection.VerificationActor.ValidateAlgoRoute
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -42,7 +43,7 @@ trait Service extends Protocols with HttpRequester {
 
         val classifyResult = for {
           cleanedText <- futureCleaningRes
-          testInput <- Unmarshal(cleanedText).to[CleanedText].map(ct => TestInput(ct.cleanedText))
+          testInput <- Unmarshal(cleanedText).to[CleanedText].map(ct => TestInput(request.algorithm, ct.cleanedText))
           classResult <- master.ask(testInput)(2 seconds)
         } yield classResult
 
@@ -52,15 +53,6 @@ trait Service extends Protocols with HttpRequester {
             case ClassificationResult(rep, dem) => ClassifyResult(request.algorithm, rep, dem).toJson
           }
         }
-
-//        classifyResult.mapTo[ClassificationResult].foreach{ res =>
-//          println(s"rep: ${res.repProb}, dem: ${res.demProb}")
-//        }
-//
-//        classifyResult.onFailure{
-//          case ex => ex.printStackTrace()
-//        }
-
 
       }
     }
@@ -73,7 +65,8 @@ object AkkaHttpMicroservice extends App with Service {
 
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
-  master ! StartImport()
-//  master ! ValidateAlgoRoute(10)
+  val verify = system.actorOf(VerificationActor.props)
+//  master ! StartImport()
+  verify ! ValidateAlgoRoute("bayes", 5)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }

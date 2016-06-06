@@ -3,7 +3,7 @@ package naive_bayes
 import akka.actor.{Actor, ActorRef, Props}
 import elasicsearch_loader.LoadActor.FinishedImport
 import elasicsearch_loader.Queries.CleanedDoc
-import naive_bayes.NaiveBayesActor.{ClassificationResult, DocsToModel, BayesModelFinished, TestInput}
+import naive_bayes.NaiveBayesActor.{ClassificationResult, DocsToModel, ModelFinished, TestInput}
 
 /**
   * Created by Yannick on 23.05.16.
@@ -11,9 +11,9 @@ import naive_bayes.NaiveBayesActor.{ClassificationResult, DocsToModel, BayesMode
 object NaiveBayesActor {
   def props(master: ActorRef) = Props(new NaiveBayesActor(master))
   case class DocsToModel(docs: List[CleanedDoc])
-  case class TestInput(textList: List[String])
+  case class TestInput(algorithm: String, textList: List[String])
   case class ClassificationResult(repProb: Double, demProb: Double)
-  case object BayesModelFinished
+  case object ModelFinished
 }
 
 class NaiveBayesActor(master: ActorRef) extends Actor {
@@ -22,18 +22,20 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
 
   def modelBuilding: Receive = {
     case FinishedImport(_, _, hits) =>
+
+      println(s"using ${hits.size} docs for model")
       val (democrats, republican) = hits.partition(_._index == "dem")
 
       val getWords: (CleanedDoc => List[String]) = doc => doc.cleanedText.split(" ").toList
 
       val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
 
-      master ! BayesModelFinished
+      master ! ModelFinished
       context become waitingForTestData(model)
   }
 
   def waitingForTestData(model: BayesModel): Receive = {
-    case TestInput(textList) =>
+    case TestInput(_, textList) =>
       val classificationList =  model.classify(textList)
       master ! ClassificationResult(classificationList.head, classificationList.tail.head)
   }

@@ -16,6 +16,8 @@ object BayesModel {
 
 class BayesModel(classes: Class*) {
   require(classes.forall(_.nonEmpty))
+  val minWordAppearance: Int = 0
+  println(s"allowing words with min $minWordAppearance word appearance in class")
 
   //number of docs in class divided by number of all docs
   private val probabilityPerClass = classes.map(_class => _class.size.toDouble / classes.flatten.size.toDouble)
@@ -26,14 +28,17 @@ class BayesModel(classes: Class*) {
   private val wordsPerClass = classes.map(_.flatten.size)
   println("words per class " + wordsPerClass)
 
-  private val getPerWordCount: (Class) => Map[Word, Double] = _class =>
+  private val getPerWordCount: (Class) => Map[Word, Double] = _class => {
     _class
-    .flatten
-    .groupBy(identity)
-    .mapValues(_.length.toDouble)
+      .flatten
+      .groupBy(identity)
+      .mapValues(_.length.toDouble)
+      .filter(_._2 >= minWordAppearance)
+  }
 
   // danger of out of memory here, possibly filter with appearance less than 2
   private val perClassWordAppearance = classes.map(getPerWordCount)
+  println(s"model has ${perClassWordAppearance.head.size + perClassWordAppearance.tail.head.size} distinct words in both rep and dem")
   println("done with model")
 
   def classify(inputText: List[Word]): Seq[Double] = {
