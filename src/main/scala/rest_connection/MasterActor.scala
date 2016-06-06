@@ -1,13 +1,10 @@
 package rest_connection
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
-import elasicsearch_loader.Queries.Hit
 import naive_bayes.NaiveBayesActor
-import naive_bayes.NaiveBayesActor.{ModelFinished, ClassificationResult, TestInput}
-import rest_connection.MasterActor.ValidateAlgoRoute
-import scala.util.Random.shuffle
+import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
 
 /**
   * Created by Yannick on 23.05.16.

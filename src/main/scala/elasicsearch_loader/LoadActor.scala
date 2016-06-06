@@ -30,6 +30,9 @@ class LoadActor(master: ActorRef) extends Actor with ElasticScrolling {
   def receive: Receive = {
     case StartImport(index, docType) =>
       val futureScrollId = initScrollScan(index, docType)
+      futureScrollId.onFailure{
+        case ex => ex.printStackTrace()
+      }
       val scrollId = Await.result(futureScrollId, 2 seconds)
 
       def go(id: ScrollId, acc: List[Hit]): Future[List[Hit]] = {

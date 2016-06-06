@@ -1,22 +1,19 @@
 package rest_connection
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import elasicsearch_loader.LoadActor.StartImport
-import util.{HttpRequester, Protocols, Settings}
-import spray.json._
-import akka.pattern.ask
 import naive_bayes.NaiveBayesActor.{ClassificationResult, TestInput}
-import rest_connection.MasterActor.ValidateAlgoRoute
 import rest_connection.VerificationActor.ValidateAlgoRoute
+import spray.json._
+import util.{HttpRequester, Protocols, Settings}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
