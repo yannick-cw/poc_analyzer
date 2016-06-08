@@ -37,7 +37,7 @@ class VerificationActor extends Actor {
 
   def verifyingAlgo(algoActor: ActorRef, testDataPercentage: Int, testData: List[Hit], result: List[(String, String, Boolean)], lastElement: Hit): Receive = {
     case finishedImport: FinishedImport =>
-      val minUpvotes: Int = 15
+      val minUpvotes: Int = 0
       println(s"allowing docs with min $minUpvotes upvotes")
       val filterByMinUp = finishedImport.hits.filter(_._source.ups >= minUpvotes)
       val (test, train) = shuffle(filterByMinUp).splitAt(filterByMinUp.size * testDataPercentage / 100)

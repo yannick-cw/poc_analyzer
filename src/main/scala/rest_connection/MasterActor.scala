@@ -29,7 +29,7 @@ class MasterActor extends Actor {
   }
 
   def acceptingTestData(requester: ActorRef): Receive = {
-    case testInput@TestInput("bayes", _) =>
+    case testInput@TestInput("naive_bayes", _) =>
       bayesActor ! testInput
       context become acceptingTestData(sender)
     case res@ClassificationResult(a,b) =>

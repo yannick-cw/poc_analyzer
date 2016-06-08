@@ -36,7 +36,7 @@ class BayesModel(classes: Class*) {
       .filter(_._2 >= minWordAppearance)
   }
 
-  // danger of out of memory here, possibly filter with appearance less than 2
+  // danger of out of memory here, maybe .par
   private val perClassWordAppearance = classes.map(getPerWordCount)
   println(s"model has ${perClassWordAppearance.head.size + perClassWordAppearance.tail.head.size} distinct words in both rep and dem")
   println("done with model")
