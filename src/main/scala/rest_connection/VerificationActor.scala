@@ -13,10 +13,6 @@ import wekaTests.WekaTest
 import scala.util.Random._
 
 /**
-  * Created by 437580 on 06/06/16.
-  */
-
-/**
   * Created by Yannick on 23.05.16.
   */
 object VerificationActor {
