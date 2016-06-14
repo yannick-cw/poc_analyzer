@@ -30,7 +30,7 @@ class TfIdfActor(master: ActorRef) extends Actor {
 
   def waitingForTestData(model: TfIdfModel): Receive = {
     case TestInput(_, textList) =>
-      val classificationList =  model.classify(textList)
+      val classificationList = model.classify(textList)
       master ! ClassificationResult(classificationList.head, classificationList.tail.head)
   }
 

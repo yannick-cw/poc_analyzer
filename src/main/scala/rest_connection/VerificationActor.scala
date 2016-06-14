@@ -33,7 +33,8 @@ class VerificationActor extends Actor {
   def receive: Receive = {
     case ValidateAlgoRoute(algo, testData) => elasticLoader ! StartImport()
       algo match {
-        case "bayes" => context become verifyingAlgo(tfIdfActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
+        case "bayes" => context become verifyingAlgo(bayesActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
+        case "bayes_idf" => context become verifyingAlgo(tfIdfActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
       }
   }
 

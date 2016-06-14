@@ -67,6 +67,6 @@ object AkkaHttpMicroservice extends App with Service {
   val master = system.actorOf(MasterActor.props)
   val verify = system.actorOf(VerificationActor.props)
 //  master ! StartImport()
-  verify ! ValidateAlgoRoute("bayes", 5)
+  verify ! ValidateAlgoRoute("bayes_idf", 5)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }
