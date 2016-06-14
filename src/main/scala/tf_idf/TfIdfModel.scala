@@ -68,7 +68,7 @@ class TfIdfModel(classes: Class*) {
         val classWiseProbabilities = zipped.map {
             case (totalWordsClass, individualWordCountMap) =>
                 inputText.map { word =>
-                    val tfidfForWord = (groupedWords(word) / maxUsedWordCount) * idfForWords(word)
+                    val tfidfForWord = (groupedWords(word).toDouble / maxUsedWordCount.toDouble) * idfForWords(word)
                     println(s"TF*Idf for $word = $tfidfForWord")
                     (individualWordCountMap.getOrElse(word, 0.0) + 1.0) / (totalWordsClass + vocabularySize) * tfidfForWord
                 }

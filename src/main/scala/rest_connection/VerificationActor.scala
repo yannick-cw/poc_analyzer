@@ -5,8 +5,9 @@ import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import elasicsearch_loader.Queries.Hit
 import naive_bayes.NaiveBayesActor
-import naive_bayes.NaiveBayesActor.{ModelFinished, ClassificationResult, TestInput}
+import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
 import rest_connection.VerificationActor.ValidateAlgoRoute
+import tf_idf.TfIdfActor
 
 import scala.util.Random._
 
@@ -27,17 +28,18 @@ object VerificationActor {
 class VerificationActor extends Actor {
   val elasticLoader = context.actorOf(LoadActor.props(self))
   val bayesActor = context.actorOf(NaiveBayesActor.props(self))
+  val tfIdfActor = context.actorOf(TfIdfActor.props(self))
 
   def receive: Receive = {
     case ValidateAlgoRoute(algo, testData) => elasticLoader ! StartImport()
       algo match {
-        case "bayes" => context become verifyingAlgo(bayesActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
+        case "bayes" => context become verifyingAlgo(tfIdfActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
       }
   }
 
   def verifyingAlgo(algoActor: ActorRef, testDataPercentage: Int, testData: List[Hit], result: List[(String, String, Boolean)], lastElement: Hit): Receive = {
     case finishedImport: FinishedImport =>
-      val minUpvotes: Int = 0
+      val minUpvotes: Int = 10
       println(s"allowing docs with min $minUpvotes upvotes")
       val filterByMinUp = finishedImport.hits.filter(_._source.ups >= minUpvotes)
       val (test, train) = shuffle(filterByMinUp).splitAt(filterByMinUp.size * testDataPercentage / 100)
