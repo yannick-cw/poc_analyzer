@@ -48,9 +48,9 @@ class VerificationActor extends Actor {
       val maxItems = scala.math.min(d.size, r.size)
       val maxItemsTest = scala.math.min(td.size, tr.size)
       val train = d.take(maxItems) ++ r.take(maxItems)
-      val test = td.take(maxItems) ++ tr.take(maxItemsTest)
-      println(s"using train data $maxItems")
-      println(s"using test data $maxItemsTest")
+      val test = td.take(maxItemsTest) ++ tr.take(maxItemsTest)
+      println(s"using train data ${train.size}")
+      println(s"using test data ${test.size}")
 
       algoActor ! FinishedImport("", "", train)
       context become verifyingAlgo(algoActor, testDataPercentage, test, List.empty[(String, String, Boolean)], null)
