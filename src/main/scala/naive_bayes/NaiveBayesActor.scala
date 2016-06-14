@@ -11,7 +11,7 @@ import naive_bayes.NaiveBayesActor.{ClassificationResult, DocsToModel, ModelFini
 object NaiveBayesActor {
   def props(master: ActorRef) = Props(new NaiveBayesActor(master))
   case class DocsToModel(docs: List[CleanedDoc])
-  case class TestInput(algorithm: String, textList: List[String])
+  case class TestInput(algorithm: String, textList: List[String], originalText: String)
   case class ClassificationResult(repProb: Double, demProb: Double)
   case object ModelFinished
 }
@@ -26,18 +26,21 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
       println(s"using ${hits.size} docs for model")
       val (democrats, republican) = hits.partition(_._index == "dem")
 
-      val getWords: (CleanedDoc => List[String]) = doc => doc.cleanedText.split(" ").toList
+      val getWords: (CleanedDoc => List[String]) = doc => {
+        createNGram(texts = doc.cleanedText.split(" "))
+      }
 
       val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
 
       master ! ModelFinished
       context become waitingForTestData(model)
   }
-
   def waitingForTestData(model: BayesModel): Receive = {
-    case TestInput(_, textList) =>
+    case TestInput(_, texts, _) =>
+      val textList = createNGram(texts = texts)
       val classificationList =  model.classify(textList)
       master ! ClassificationResult(classificationList.head, classificationList.tail.head)
   }
 
+  def createNGram(size: Int = 1, texts: Seq[String]): List[String] = texts.sliding(size).map(_.mkString(" ")).toList
 }

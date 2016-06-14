@@ -43,7 +43,7 @@ trait Service extends Protocols with HttpRequester {
 
         val classifyResult = for {
           cleanedText <- futureCleaningRes
-          testInput <- Unmarshal(cleanedText).to[CleanedText].map(ct => TestInput(request.algorithm, ct.cleanedText))
+          testInput <- Unmarshal(cleanedText).to[CleanedText].map(ct => TestInput(request.algorithm, ct.cleanedText, request.text))
           classResult <- master.ask(testInput)(4 seconds)
         } yield classResult
 
@@ -67,6 +67,6 @@ object AkkaHttpMicroservice extends App with Service {
   val master = system.actorOf(MasterActor.props)
   val verify = system.actorOf(VerificationActor.props)
 //  master ! StartImport()
-  verify ! ValidateAlgoRoute("bayes_idf", 5)
+  verify ! ValidateAlgoRoute("weka", 5)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }

@@ -1,12 +1,9 @@
 package tf_idf
 
-import tf_idf.TfIdfModel.{Class, Word, Doc}
+import naive_bayes.BayesModel._
+
 
 object TfIdfModel {
-  type Class = List[Doc]
-  type Doc = List[Word]
-  type Word = String
-
   def apply(classes: Class*): TfIdfModel = new TfIdfModel(classes: _*)
 }
 

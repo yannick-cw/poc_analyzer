@@ -1,5 +1,6 @@
 package tf_idf
 
+import naive_bayes.BayesModel
 import org.scalatest.{MustMatchers, WordSpecLike}
 
 /**
