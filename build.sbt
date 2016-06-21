@@ -22,7 +22,6 @@ libraryDependencies += "org.scalanlp" % "nak" % "1.2.1"
 
 libraryDependencies += "nz.ac.waikato.cms.weka" % "weka-stable" % "3.8.0"
 
-
 fork in run := true
 javaOptions ++= Seq("-Xms512M", "-Xmx4G", "-XX:+UseConcMarkSweepGC")
 

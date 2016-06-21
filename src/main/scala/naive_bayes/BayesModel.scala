@@ -1,6 +1,8 @@
 package naive_bayes
 
+import elasicsearch_loader.Queries.CleanedDoc
 import naive_bayes.BayesModel.{Class, Word}
+import utils.Model
 
 /**
   * Created by Yannick on 23.05.16.
@@ -14,7 +16,8 @@ object BayesModel {
   def apply(classes: Class*): BayesModel = new BayesModel(classes:_*)
 }
 
-class BayesModel(classes: Class*) {
+class BayesModel(classes: Class*) extends Model {
+  val name = "naive_bayes"
   require(classes.forall(_.nonEmpty))
   val minWordAppearance: Int = 0
   println(s"allowing words with min $minWordAppearance word appearance in class")
@@ -41,8 +44,8 @@ class BayesModel(classes: Class*) {
   println(s"model has ${perClassWordAppearance.head.size + perClassWordAppearance.tail.head.size} distinct words in both rep and dem")
   println("done with model")
 
-  def classify(inputText: List[Word]): Seq[Double] = {
-
+  def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
+    val inputText = cleanedDoc.cleanedText.split(" ")
     val zipped = wordsPerClass.zip(perClassWordAppearance)
 
     val classWiseProbabilities = zipped

@@ -1,4 +1,5 @@
 package naive_bayes
+import elasicsearch_loader.Queries.CleanedDoc
 import org.scalatest.{MustMatchers, WordSpecLike}
 
 /**
@@ -12,7 +13,7 @@ class BayesModelSpec extends WordSpecLike with MustMatchers {
 
       val classB: List[List[String]] = List(List("Tokyo", "Japan", "Chinese"))
 
-      val testInput = List("Chinese", "Chinese", "Chinese", "Tokyo", "Japan")
+      val testInput = CleanedDoc("", 0, "", "Chinese Chinese Chinese Tokyo Japan")
 
       val model = BayesModel(classA, classB)
       model.classify(testInput) must be(Seq(3.0121377997263036E-4,1.3548070246744226E-4))

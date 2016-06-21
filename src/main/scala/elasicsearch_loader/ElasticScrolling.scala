@@ -4,7 +4,7 @@ import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import elasicsearch_loader.Queries.ScrollResponse
-import util.{HttpRequester, Protocols, Settings}
+import utils.{HttpRequester, Protocols, Settings}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

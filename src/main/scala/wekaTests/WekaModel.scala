@@ -2,6 +2,7 @@ package wekaTests
 
 import java.util
 
+import utils.Model
 import elasicsearch_loader.Queries._
 import weka.classifiers.bayes.NaiveBayes
 import weka.core.{Attribute, DenseInstance, Instances}
@@ -10,7 +11,9 @@ import weka.core.{Attribute, DenseInstance, Instances}
 /**
   * Created by Yannick on 14/06/16.
   */
-class WekaModel(hits: List[Hit]) extends FeatureBuilder {
+class WekaModel(hits: List[Hit]) extends FeatureBuilder with Model {
+  val name = "weka"
+
   val mistakes = new Attribute("mistakes")
   val sentenceLength = new Attribute("sentenceLength")
   val words = new Attribute("words")
@@ -32,7 +35,7 @@ class WekaModel(hits: List[Hit]) extends FeatureBuilder {
   fvAttr.add(distinctWords)
   fvAttr.add(classAttr)
 
-  val trainSet = new Instances("train", fvAttr, 200000)
+  val trainSet = new Instances("train", fvAttr, 10000)
   trainSet.setClassIndex(6)
 
   hits.par.foreach { hit =>
@@ -51,16 +54,28 @@ class WekaModel(hits: List[Hit]) extends FeatureBuilder {
   val classifyModel = new NaiveBayes()
   classifyModel.buildClassifier(trainSet)
 
-  def classify(originalText: String) = {
+  def classify(cleanedDoc: CleanedDoc) = {
+    val orgString = cleanedDoc.rawText
     val testSet = new Instances("test", fvAttr, 10)
     testSet.setClassIndex(6)
     val test = new DenseInstance(7)
-    test.setValue(fvAttr.get(0), mistakesPerWord(originalText))
-    test.setValue(fvAttr.get(1), normalizedSentenceLength(originalText))
-    test.setValue(fvAttr.get(2), wordsInDoc(originalText))
-    test.setValue(fvAttr.get(3), normalizedUppercaseLetters(originalText))
-    test.setValue(fvAttr.get(4), normalizedWordLength(originalText))
-    test.setValue(fvAttr.get(5), normalizedDistinctWords(originalText))
+
+    println(mistakesPerWord(orgString))
+    println(normalizedSentenceLength(orgString))
+    println(wordsInDoc(orgString))
+    println(normalizedUppercaseLetters(orgString))
+    println(normalizedWordLength(orgString))
+    println(normalizedDistinctWords(orgString))
+    println(orgString)
+    println()
+    println()
+
+    test.setValue(fvAttr.get(0), mistakesPerWord(orgString))
+    test.setValue(fvAttr.get(1), normalizedSentenceLength(orgString))
+    test.setValue(fvAttr.get(2), wordsInDoc(orgString))
+    test.setValue(fvAttr.get(3), normalizedUppercaseLetters(orgString))
+    test.setValue(fvAttr.get(4), normalizedWordLength(orgString))
+    test.setValue(fvAttr.get(5), normalizedDistinctWords(orgString))
     testSet.add(test)
 
     val dis = classifyModel.distributionForInstance(testSet.instance(0))

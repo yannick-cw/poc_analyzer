@@ -16,7 +16,7 @@ trait FeatureBuilder {
   }
 
   def normalizedSentenceLength(text: String): Double = if(text.nonEmpty) {
-    val sentences = text.split("[.!?]")
+    val sentences = text.split("[.!?:;]")
     sentences.map(extractWords(_).size).sum.toDouble / sentences.size
   } else 0
 

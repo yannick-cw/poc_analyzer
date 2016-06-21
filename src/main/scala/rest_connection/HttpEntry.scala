@@ -14,7 +14,7 @@ import elasicsearch_loader.LoadActor.StartImport
 import naive_bayes.NaiveBayesActor.{ClassificationResult, TestInput}
 import rest_connection.VerificationActor.ValidateAlgoRoute
 import spray.json._
-import util.{HttpRequester, Protocols, Settings}
+import utils.{HttpRequester, Protocols, Settings}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -66,7 +66,7 @@ object AkkaHttpMicroservice extends App with Service {
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
   val verify = system.actorOf(VerificationActor.props)
-//  master ! StartImport()
-  verify ! ValidateAlgoRoute("weka", 5)
+  master ! StartImport()
+//  verify ! ValidateAlgoRoute("weka", 5)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }
