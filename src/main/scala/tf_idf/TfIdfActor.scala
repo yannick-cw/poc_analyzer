@@ -6,7 +6,7 @@ import elasicsearch_loader.Queries.CleanedDoc
 import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
 
 object TfIdfActor {
-  def props(master: ActorRef) = Props(new TfIdfActor(master))
+  def props(master: ActorRef) = Props(new TfIdfHelperActor(master))
 }
 
 class TfIdfActor(master: ActorRef) extends Actor {
