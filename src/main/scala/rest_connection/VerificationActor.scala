@@ -1,19 +1,17 @@
 package rest_connection
 
 import akka.actor.{Actor, ActorRef, Props}
+import akka.stream.scaladsl.Source
 import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import elasicsearch_loader.Queries.Hit
 import naive_bayes.NaiveBayesActor
-import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
-import rest_connection.VerificationActor.ValidateAlgoRoute
+import naive_bayes.NaiveBayesActor.ModelFinished
+import rest_connection.VerificationActor.{EvalResult, ValidateAlgoRoute}
 import tf_idf.TfIdfActor
+import wekaTests.{FeatureBuilder, WekaActor}
 
 import scala.util.Random._
-
-/**
-  * Created by 437580 on 06/06/16.
-  */
 
 /**
   * Created by Yannick on 23.05.16.
@@ -23,45 +21,66 @@ object VerificationActor {
   val name = "verification"
 
   case class ValidateAlgoRoute(algorithm: String, testData: Int)
+  case class EvalResult(expected: String, originalMessage: String, correct: Boolean)
 }
 
-class VerificationActor extends Actor {
+class VerificationActor extends Actor with FeatureBuilder {
   val elasticLoader = context.actorOf(LoadActor.props(self))
   val bayesActor = context.actorOf(NaiveBayesActor.props(self))
   val tfIdfActor = context.actorOf(TfIdfActor.props(self))
+  val wekaActor = context.actorOf(WekaActor.props(self))
 
   def receive: Receive = {
-    case ValidateAlgoRoute(algo, testData) => elasticLoader ! StartImport()
+    case ValidateAlgoRoute(algo, testDataPercent) => elasticLoader ! StartImport()
       algo match {
-        case "bayes" => context become verifyingAlgo(bayesActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
-        case "bayes_idf" => context become verifyingAlgo(tfIdfActor, testData, List.empty[Hit], List.empty[(String, String, Boolean)], null)
+        case "bayes" => context become createModel(bayesActor, testDataPercent)
+        case "bayes_idf" => context become createModel(tfIdfActor, testDataPercent)
+        case "weka" => context become createModel(wekaActor, testDataPercent)
       }
   }
 
-  def verifyingAlgo(algoActor: ActorRef, testDataPercentage: Int, testData: List[Hit], result: List[(String, String, Boolean)], lastElement: Hit): Receive = {
+  def createModel(algoActor: ActorRef, testDataPercentage: Int): Receive = {
     case finishedImport: FinishedImport =>
-      val minUpvotes: Int = 10
+      val minUpvotes: Int = 1
       println(s"allowing docs with min $minUpvotes upvotes")
-      val filterByMinUp = finishedImport.hits.filter(_._source.ups >= minUpvotes)
-      val (test, train) = shuffle(filterByMinUp).splitAt(filterByMinUp.size * testDataPercentage / 100)
+      val (dem, rep) = shuffle(finishedImport.hits)
+          .filter(_._source.ups >= minUpvotes)
+          .partition(_._index == "dem")
+
+      val allData = dem.zip(rep).flatten(tuple => List(tuple._1, tuple._2)).take(10000)
+      println(s"using ${allData.size} docs total")
+
+      val (test, train) = allData.splitAt(allData.size * testDataPercentage / 100)
+      println(s"using train data ${train.size}")
+      println(s"using test data ${test.size}")
+
       algoActor ! FinishedImport("", "", train)
-      context become verifyingAlgo(algoActor, testDataPercentage, test, List.empty[(String, String, Boolean)], null)
+      context become evaluating(test)
+  }
 
-    case ModelFinished =>
-      algoActor ! TestInput("", testData.head._source.cleanedText.split(" +").toList)
-      context become verifyingAlgo(algoActor, testDataPercentage, testData.tail, result, testData.head)
+  def evaluating(testData: List[Hit]): Receive = {
+    case ModelFinished(model) =>
+          val res = testData.map{ hit =>
+              val eval = model.classify(hit._source)
+              val evaluated: String = if (eval.head >= eval.tail.head) "rep" else "dem"
+              EvalResult(
+                expected = hit._index,
+                originalMessage = hit._source.cleanedText,
+                correct = hit._index == evaluated)
+            }
 
-    case ClassificationResult(rep, dem) =>
-      if (testData.nonEmpty) {
-        algoActor ! TestInput("", testData.head._source.cleanedText.split(" +").toList)
-        context become verifyingAlgo(algoActor, testDataPercentage, testData.tail, (lastElement._index, lastElement._source.cleanedText, (rep >= dem && lastElement._index == "rep") || (dem > rep && lastElement._index == "dem")) :: result, testData.head)
-      } else {
-        val resFalseTrue = result.map(_._3).groupBy(identity).mapValues(_.size)
-        println(resFalseTrue)
-        println("correct classified: " + (resFalseTrue(true).toDouble / (resFalseTrue(true).toDouble + resFalseTrue(false).toDouble)) * 100 + "%")
-        val demRepFalse = result.groupBy(_._1).mapValues(_.map(_._3).count(_ == false))
-        println(s"wrong dems: ${demRepFalse("dem")} and wrong reps: ${demRepFalse("rep")}")
-      }
+          val correctClassified = res.filter(_.correct)
+          val correctClassifiedReps = correctClassified.filter(_.expected == "rep")
+          val correctClassifiedDems = correctClassified.filter(_.expected == "dem")
+          val wrongClassifiedDems = res.filterNot(_.correct).filter(_.expected == "dem")
+          val wrongClassifiedReps = res.filterNot(_.correct).filter(_.expected == "rep")
+          val percentageCorrect = (correctClassified.size.toDouble / res.size.toDouble) * 100
+
+          println(s"percentage correct: $percentageCorrect")
+          println(s"wrong dems: ${wrongClassifiedDems.size}")
+          println(s"wrong reps: ${wrongClassifiedReps.size}")
+          println(s"correct dems: ${correctClassifiedDems.size}")
+          println(s"correct reps: ${correctClassifiedReps.size}")
   }
 }
 

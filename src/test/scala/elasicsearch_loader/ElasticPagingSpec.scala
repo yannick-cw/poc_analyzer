@@ -5,7 +5,7 @@ import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import org.scalatest.{MustMatchers, WordSpecLike}
-import util.{Settings, TestData}
+import utils.{Settings, TestData}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}

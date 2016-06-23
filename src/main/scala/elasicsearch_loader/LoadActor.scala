@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import akka.stream.ActorMaterializer
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import elasicsearch_loader.Queries.{CleanedDoc, Hit, ScrollResponse}
-import util.Settings
+import utils.Settings
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}

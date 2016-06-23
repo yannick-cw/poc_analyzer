@@ -1,16 +1,17 @@
 package tf_idf
 
-import tf_idf.TfIdfModel.{Class, Word, Doc}
+import elasicsearch_loader.Queries.CleanedDoc
+import naive_bayes.BayesModel._
+import utils.Model
+
 
 object TfIdfModel {
-  type Class = List[Doc]
-  type Doc = List[Word]
-  type Word = String
-
   def apply(classes: Class*): TfIdfModel = new TfIdfModel(classes: _*)
 }
 
-class TfIdfModel(classes: Class*) {
+class TfIdfModel(classes: Class*) extends Model {
+
+  val name = "naive_bayes_idf"
   //require(classes.forall(_.nonEmpty))
   val minWordAppearance: Int = 0
   println(s"allowing words with min $minWordAppearance word appearance in class")
@@ -58,8 +59,9 @@ class TfIdfModel(classes: Class*) {
   }
 
 
-  def classify(inputText: List[Word]): Seq[Double] = {
+  def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
     //mabe use Streams for working on already calculated idfs?
+    val inputText = cleanedDoc.cleanedText.split(" ")
     calculateIDFsForWords(inputText)
     val groupedWords = inputText.groupBy(identity).mapValues(_.length)
     val maxUsedWordCount = groupedWords.max._2

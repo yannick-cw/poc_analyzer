@@ -24,14 +24,6 @@ class TfIdfActor(master: ActorRef) extends Actor {
       val model = TfIdfModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
       println("TF*IDF model finished")
 
-      master ! ModelFinished
-      context become waitingForTestData(model)
+      master ! ModelFinished(model)
   }
-
-  def waitingForTestData(model: TfIdfModel): Receive = {
-    case TestInput(_, textList) =>
-      val classificationList = model.classify(textList)
-      master ! ClassificationResult(classificationList.head, classificationList.tail.head)
-  }
-
 }
