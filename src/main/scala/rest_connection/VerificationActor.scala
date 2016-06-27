@@ -1,7 +1,6 @@
 package rest_connection
 
 import akka.actor.{Actor, ActorRef, Props}
-import akka.stream.scaladsl.Source
 import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import elasicsearch_loader.Queries.Hit
@@ -10,6 +9,7 @@ import naive_bayes.NaiveBayesActor.ModelFinished
 import rest_connection.VerificationActor.{EvalResult, ValidateAlgoRoute}
 import tf_idf.TfIdfActor
 import wekaTests.{FeatureBuilder, WekaActor}
+import weka_bag_of_words.WekaBagOfWordsActor
 
 import scala.util.Random._
 
@@ -29,6 +29,7 @@ class VerificationActor extends Actor with FeatureBuilder {
   val bayesActor = context.actorOf(NaiveBayesActor.props(self))
   val tfIdfActor = context.actorOf(TfIdfActor.props(self))
   val wekaActor = context.actorOf(WekaActor.props(self))
+  val wekaBagOfWords = context.actorOf(WekaBagOfWordsActor.props(self))
 
   def receive: Receive = {
     case ValidateAlgoRoute(algo, testDataPercent) => elasticLoader ! StartImport()
@@ -36,18 +37,19 @@ class VerificationActor extends Actor with FeatureBuilder {
         case "bayes" => context become createModel(bayesActor, testDataPercent)
         case "bayes_idf" => context become createModel(tfIdfActor, testDataPercent)
         case "weka" => context become createModel(wekaActor, testDataPercent)
+        case "weka_bag_of_words" => context become createModel(wekaBagOfWords, testDataPercent)
       }
   }
 
   def createModel(algoActor: ActorRef, testDataPercentage: Int): Receive = {
     case finishedImport: FinishedImport =>
-      val minUpvotes: Int = 1
+      val minUpvotes: Int = 20
       println(s"allowing docs with min $minUpvotes upvotes")
       val (dem, rep) = shuffle(finishedImport.hits)
           .filter(_._source.ups >= minUpvotes)
           .partition(_._index == "dem")
 
-      val allData = dem.zip(rep).flatten(tuple => List(tuple._1, tuple._2)).take(10000)
+      val allData = dem.zip(rep).flatten(tuple => List(tuple._1, tuple._2)).take(100000)
       println(s"using ${allData.size} docs total")
 
       val (test, train) = allData.splitAt(allData.size * testDataPercentage / 100)

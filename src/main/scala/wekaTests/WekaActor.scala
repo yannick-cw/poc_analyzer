@@ -10,10 +10,6 @@ import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInp
   */
 object WekaActor {
   def props(master: ActorRef) = Props(new WekaActor(master))
-  case class DocsToModel(docs: List[CleanedDoc])
-  case class TestInput(algorithm: String, textList: List[String])
-  case class ClassificationResult(repProb: Double, demProb: Double)
-  case object ModelFinished
 }
 
 class WekaActor(master: ActorRef) extends Actor {

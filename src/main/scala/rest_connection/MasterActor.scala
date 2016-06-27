@@ -32,14 +32,14 @@ class MasterActor extends Actor {
   def working(models: Map[String, Model]): Receive = {
     case finishedImport: FinishedImport =>
       bayesActor ! finishedImport
-    //      tfIdfActor ! finishedImport
-    //      weka ! finishedImport
+//      tfIdfActor ! finishedImport
+//      weka ! finishedImport
     case ModelFinished(model) => context become working(models.updated(model.name, model))
 
     case testInput@TestInput(algorithm, text, originalText) =>
-      sender ! models.get(algorithm).map { model =>
+      sender ! models.get(algorithm).map{model =>
         val classRes = model.classify(CleanedDoc("", 0, originalText, text.mkString(" ")))
         ClassificationResult(classRes.head, classRes.tail.head)
-      }.getOrElse(ClassificationResult(0, 0))
+      }.getOrElse(ClassificationResult(0,0))
   }
 }

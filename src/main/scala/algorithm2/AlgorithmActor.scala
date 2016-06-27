@@ -1,9 +1,9 @@
 package algorithm2
 
 import akka.actor.{Actor, ActorRef, Props}
+import algorithm2.AlgorithmActor.{BayesModelFinished, ClassificationResult, TestInput}
 import elasicsearch_loader.LoadActor.FinishedImport
 import elasicsearch_loader.Queries.CleanedDoc
-import naive_bayes.NaiveBayesActor.{BayesModelFinished, ClassificationResult, TestInput}
 
 
 object AlgorithmActor {
