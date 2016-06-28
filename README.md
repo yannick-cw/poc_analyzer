@@ -10,6 +10,10 @@ basic idea
 Reddit etc
 
 ## The Software Architecture
+[The Importer](https://github.com/yannick-cw/poc-importer)  
+[The Frontend](https://github.com/yannick-cw/poc_frontend)  
+[The cleaner](https://github.com/yannick-cw/poc_cleaner)  
+
 docker, microservices, scala, elasticsearch, weka, play  
 ![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/pocStructure.png "Architecture")
 
