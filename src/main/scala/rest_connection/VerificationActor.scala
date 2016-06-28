@@ -62,6 +62,7 @@ class VerificationActor extends Actor with FeatureBuilder {
 
   def evaluating(testData: List[Hit]): Receive = {
     case ModelFinished(model) =>
+      println(s"evaluating ${model.name}")
           val res = testData.map{ hit =>
               val eval = model.classify(hit._source)
               val evaluated: String = if (eval.head >= eval.tail.head) "rep" else "dem"
