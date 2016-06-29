@@ -50,10 +50,14 @@ and waaay faster
 
 #### Support Vector Machine
 - really long training time
+- own sanitization without TF * IDF: 77.28%
 
 #### J48 Tree
 - really long training time
-- own sanitization with TF * IDF: 
+- own sanitization with TF * IDF: 76.53%
 
 #### k-Nearest Neighbors
 - own sanitization with TF * IDF: 69.76%
+
+#### SVM for text data
+- own sanitization with TF * IDF: 78.4%
