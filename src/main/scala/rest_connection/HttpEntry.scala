@@ -66,7 +66,7 @@ object AkkaHttpMicroservice extends App with Service {
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
   val verify = system.actorOf(VerificationActor.props)
-//  master ! StartImport()
-  verify ! ValidateAlgoRoute("weka_bag_of_words", 5)
+  master ! StartImport()
+  //verify ! ValidateAlgoRoute("weka_bag_of_words", 5)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }

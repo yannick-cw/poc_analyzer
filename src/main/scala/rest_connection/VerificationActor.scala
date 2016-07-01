@@ -7,7 +7,6 @@ import elasicsearch_loader.Queries.Hit
 import naive_bayes.NaiveBayesActor
 import naive_bayes.NaiveBayesActor.ModelFinished
 import rest_connection.VerificationActor.{EvalResult, ValidateAlgoRoute}
-import tf_idf.TfIdfActor
 import wekaTests.{FeatureBuilder, WekaActor}
 import weka_bag_of_words.WekaBagOfWordsActor
 
@@ -27,7 +26,6 @@ object VerificationActor {
 class VerificationActor extends Actor with FeatureBuilder {
   val elasticLoader = context.actorOf(LoadActor.props(self))
   val bayesActor = context.actorOf(NaiveBayesActor.props(self))
-  val tfIdfActor = context.actorOf(TfIdfActor.props(self))
   val wekaActor = context.actorOf(WekaActor.props(self))
   val wekaBagOfWords = context.actorOf(WekaBagOfWordsActor.props(self))
 
@@ -35,7 +33,6 @@ class VerificationActor extends Actor with FeatureBuilder {
     case ValidateAlgoRoute(algo, testDataPercent) => elasticLoader ! StartImport()
       algo match {
         case "bayes" => context become createModel(bayesActor, testDataPercent)
-        case "bayes_idf" => context become createModel(tfIdfActor, testDataPercent)
         case "weka" => context become createModel(wekaActor, testDataPercent)
         case "weka_bag_of_words" => context become createModel(wekaBagOfWords, testDataPercent)
       }

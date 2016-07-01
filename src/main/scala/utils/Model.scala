@@ -7,5 +7,5 @@ import elasicsearch_loader.Queries.CleanedDoc
   */
 trait Model {
   val name: String
-  def classify(inputText: CleanedDoc): Seq[Double]
+  def classify(inputText: CleanedDoc, useTfIdf: Boolean = false): Seq[Double]
 }

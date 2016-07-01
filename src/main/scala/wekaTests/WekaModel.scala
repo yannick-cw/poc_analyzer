@@ -54,7 +54,7 @@ class WekaModel(hits: List[Hit]) extends FeatureBuilder with Model {
   val classifyModel = new NaiveBayes()
   classifyModel.buildClassifier(trainSet)
 
-  def classify(cleanedDoc: CleanedDoc) = {
+  def classify(cleanedDoc: CleanedDoc, useTfIdf: Boolean = false) = {
     val orgString = cleanedDoc.rawText
     val testSet = new Instances("test", fvAttr, 10)
     testSet.setClassIndex(6)
