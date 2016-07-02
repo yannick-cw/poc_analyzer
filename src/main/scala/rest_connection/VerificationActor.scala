@@ -7,6 +7,7 @@ import elasicsearch_loader.Queries.Hit
 import naive_bayes.NaiveBayesActor
 import naive_bayes.NaiveBayesActor.ModelFinished
 import rest_connection.VerificationActor.{EvalResult, ValidateAlgoRoute}
+import tf_idf.TfIdfHelper
 import weka_bag_of_words.WekaBagOfWordsActor
 
 import scala.util.Random._
@@ -49,6 +50,7 @@ class VerificationActor extends Actor {
       val (test, train) = allData.splitAt(allData.size * testDataPercentage / 100)
       println(s"using train data ${train.size}")
       println(s"using test data ${test.size}")
+        TfIdfHelper.updateData(finishedImport.hits)
 
       algoActor ! FinishedImport("", "", train)
       context become evaluating(test)
