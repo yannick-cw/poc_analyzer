@@ -27,9 +27,12 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
       println(s"using ${hits.size} docs for model")
       val (democrats, republican) = hits.partition(_._index == "dem")
       val getWords: (CleanedDoc => List[String]) = doc => doc.cleanedText.split(" ").toList
-      val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
+      val bayesAlgorithm = BayesAlgorithm(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
       println("own naive bayes is done")
 
-      master ! ModelFinished(model)
+      bayesAlgorithm.models.foreach{ model =>
+        master ! ModelFinished(model)
+      }
+
   }
 }

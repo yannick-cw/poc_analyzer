@@ -59,18 +59,18 @@ class WekaBagOfWordsAlgorithms(hits: List[Hit]) {
   val models: List[Future[Model]] = List(
     Future( new Model {
       val classifier = createFilterClassifier(new BayesNet())
-      override def classify(inputText: CleanedDoc, useTfIdf: Boolean = false): Seq[Double] = classifyWithClassifier(inputText, classifier)
+      override def classify(inputText: CleanedDoc): Seq[Double] = classifyWithClassifier(inputText, classifier)
       override val name: String = "bayes_net"
     }),
     Future( new Model {
       val classifier = createFilterClassifier(new IBk())
-      override def classify(inputText: CleanedDoc, useTfIdf: Boolean = false): Seq[Double] = classifyWithClassifier(inputText, classifier)
+      override def classify(inputText: CleanedDoc): Seq[Double] = classifyWithClassifier(inputText, classifier)
       override val name: String = "knn"
     }),
     Future( new Model {
       private val classifier = new NaiveBayesMultinomialText()
       classifier.buildClassifier(trainData)
-      override def classify(inputText: CleanedDoc, useTfIdf: Boolean = false): Seq[Double] = classifyWithClassifier(inputText, classifier)
+      override def classify(inputText: CleanedDoc): Seq[Double] = classifyWithClassifier(inputText, classifier)
       override val name: String = "bayes_multinomial"
     })
   )

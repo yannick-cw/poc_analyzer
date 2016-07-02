@@ -1,6 +1,6 @@
 package algorithm2
 
-import naive_bayes.BayesModel.{Class, Word}
+import naive_bayes.BayesAlgorithm.{Class, Word}
 
 /**
   * Created by Yannick on 23.05.16.

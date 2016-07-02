@@ -1,7 +1,7 @@
 package tf_idf
 
 import elasicsearch_loader.Queries.CleanedDoc
-import naive_bayes.BayesModel
+import naive_bayes.BayesAlgorithm$
 import org.scalatest.{MustMatchers, WordSpecLike}
 
 /**
@@ -17,7 +17,7 @@ class TfIdfSpec extends WordSpecLike with MustMatchers {
 
       val testInput = CleanedDoc("", 0, "", "Chinese Chinese Chinese Tokyo Japan")
 
-      val model = BayesModel(classA, classB)
+      val model = BayesAlgorithm(classA, classB)
       model.classify(testInput) must be(Seq(3.0121377997263036E-4,1.3548070246744226E-4))
     }
   }
