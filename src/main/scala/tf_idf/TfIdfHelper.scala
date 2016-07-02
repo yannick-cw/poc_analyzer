@@ -5,9 +5,9 @@ import naive_bayes.BayesAlgorithm.{Doc, Word}
 
 
 case class DocumentCorpus(
-                           var wordsInDocuments: List[Option[Doc]] = List.empty,
+                           var wordsInDocuments: List[Doc] = List.empty,
                            var numberOfDocuments: Int = 0,
-                           idfsForWords: Map[Word, Double] = Map.empty
+                           var idfsForWords: Map[Word, Double] = Map.empty
                          )
 
 case class TfIdfResult(resultTfIdfs: Map[Word, Double])
@@ -22,7 +22,6 @@ object TfIdfHelper {
     documentCorpus.wordsInDocuments = words
       .map(_._source)
       .map(_.cleanedText.split(" ").toList)
-      .map(Some(_))
 
     documentCorpus.numberOfDocuments = words.size
 
@@ -44,16 +43,12 @@ object TfIdfHelper {
 
 
     def updateIDFs() = {
-
-      val allWords = documentCorpus.wordsInDocuments.flatten.distinct
-
-      userWords.zipWithIndex.foreach { case (word, count) => {
-        documentCorpus.idfsForWords.updated(
-          word,
-          math.log(1.0 + (documentCorpus.numberOfDocuments / (documentCorpus.wordsInDocuments.count(_.contains(word)) + 1)))
+      userWords.distinct.withFilter(word => !(documentCorpus.idfsForWords.keySet contains word)).foreach { case word => {
+          documentCorpus.idfsForWords += (
+              word ->
+              math.log(1.0 + (documentCorpus.numberOfDocuments / (documentCorpus.wordsInDocuments.count(_.contains(word)) + 1)))
         )
-      }
-      }
+      }}
 
     }
 
@@ -67,6 +62,7 @@ object TfIdfHelper {
     }
 
     updateIDFs()
+      println(s"idfs = ${documentCorpus.idfsForWords.mkString(",")}")
     TfIdfResult(calculateTfIdfForClass)
 
   }

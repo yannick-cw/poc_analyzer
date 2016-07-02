@@ -6,6 +6,7 @@ import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import elasicsearch_loader.Queries.CleanedDoc
 import naive_bayes.NaiveBayesActor
 import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
+import tf_idf.TfIdfHelper
 import utils.Model
 import weka_bag_of_words.WekaBagOfWordsActor
 
@@ -35,14 +36,16 @@ class MasterActor extends Actor {
       println(s"allowing docs with min $minUpvotes upvotes")
       val filteredHits = FinishedImport(index, docType, hits.filter(_._source.ups > minUpvotes))
       println(s"using ${filteredHits.hits.size} docs total")
+        TfIdfHelper.updateData(hits)
       bayesActor ! filteredHits
       wekaActor ! filteredHits
 
     case ModelFinished(model) => context become working(models.updated(model.name, model))
 
     case testInput@TestInput(algorithm, text, originalText) =>
+        println(testInput)
       sender ! models.get(algorithm).map { model =>
-        val classRes = model.classify(CleanedDoc("", 0, originalText, text.mkString(" ")))
+        val classRes = model.classify(CleanedDoc("", 0, originalText, text))
         ClassificationResult(classRes.head, classRes.tail.head)
       }.getOrElse(ClassificationResult(0, 0))
   }
