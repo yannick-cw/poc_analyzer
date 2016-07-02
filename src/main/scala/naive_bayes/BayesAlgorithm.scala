@@ -18,7 +18,7 @@ object BayesAlgorithm {
 
 class BayesAlgorithm(classes: Class*) {
     //require(classes.forall(_.nonEmpty))
-    val minWordAppearance: Int = 0
+    private val minWordAppearance: Int = 0
     println(
         s"allowing words with min $minWordAppearance word appearance in class")
 
@@ -46,13 +46,12 @@ class BayesAlgorithm(classes: Class*) {
           perClassWordAppearance.tail.head.size
     } distinct words in both rep and dem")
     println("done with model")
-    val zipped = wordsPerClass.zip(perClassWordAppearance)
+    private val zipped = wordsPerClass.zip(perClassWordAppearance)
 
     val models = List(
         new Model {
             override def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
                 val inputText = cleanedDoc.cleanedText.split(" ")
-                println("1 " + inputText.mkString(", "))
                 val zipped = wordsPerClass.zip(perClassWordAppearance)
 
                 val classWiseProbabilities = zipped
