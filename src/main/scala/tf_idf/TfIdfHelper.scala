@@ -21,7 +21,7 @@ object TfIdfHelper {
 
     documentCorpus.wordsInDocuments = words
       .map(_._source)
-      .map(_.cleanedText.split(" ").toList)
+      .map(_.cleanedText.split(" ").distinct.toList)
 
     documentCorpus.numberOfDocuments = words.size
 
