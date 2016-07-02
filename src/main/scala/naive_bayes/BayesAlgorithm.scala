@@ -18,7 +18,7 @@ object BayesAlgorithm {
 
 class BayesAlgorithm(classes: Class*) {
   //require(classes.forall(_.nonEmpty))
-  val minWordAppearance: Int = 0
+  private val minWordAppearance: Int = 0
   println(
     s"allowing words with min $minWordAppearance word appearance in class")
 
@@ -46,62 +46,64 @@ class BayesAlgorithm(classes: Class*) {
       perClassWordAppearance.tail.head.size
   } distinct words in both rep and dem")
   println("done with model")
-  val zipped = wordsPerClass.zip(perClassWordAppearance)
+  private val zipped = wordsPerClass.zip(perClassWordAppearance)
 
   val models = List(
     new Model {
-      override  def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
+      override def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
         val inputText = cleanedDoc.cleanedText.split(" ")
         val zipped = wordsPerClass.zip(perClassWordAppearance)
 
         val classWiseProbabilities = zipped
           .map { case (totalWordsClass, individualWordCountMap) => inputText
-            .map{ word => (individualWordCountMap.getOrElse(word, 0.0) + 1.0) / (totalWordsClass + vocabularySize)}
+            .map { word => (individualWordCountMap.getOrElse(word, 0.0) + 1.0) / (totalWordsClass + vocabularySize) }
           }
 
         classWiseProbabilities
           .map(_.product)
           .zip(probabilityPerClass)
-          .map{ case (wordInClassProbability, generalClasProbability) =>  wordInClassProbability * generalClasProbability }
+          .map { case (wordInClassProbability, generalClasProbability) => wordInClassProbability * generalClasProbability }
       }
+
       override val name: String = "naive_bayes"
     },
     new Model {
       override def classify(cleanedDoc: CleanedDoc): Seq[Double] = ???
-//      {
-//        val rawInputTextSplit = cleanedDoc.cleanedText.split(" ")
-//
-//        val tfIdfs = useTfIdf match {
-//          case true => Some(TfIdfHelper.calculate(rawInputTextSplit).resultTfIdfs)
-//          case false => None
-//        }
-//
-//        val inputText = useTfIdf match {
-//          case true => rawInputTextSplit.distinct
-//          case false => rawInputTextSplit
-//        }
-//
-//        val classWiseProbabilities = zipped.map {
-//          case (totalWordsClass, individualWordCountMap) => {
-//
-//            inputText.map { word => {
-//              val tfIdfForWord = tfIdfs.isDefined match {
-//                case true => tfIdfs.get.getOrElse(word, 1.0)
-//                case false => 1.0
-//              }
-//
-//              tfIdfForWord * (individualWordCountMap.getOrElse(word, 0.0) +
-//                1.0) / (totalWordsClass + vocabularySize)
-//            }
-//            }
-//          }
-//        }
-//
-//        classWiseProbabilities.map(_.product).zip(probabilityPerClass).map {
-//          case (wordInClassProbability, generalClasProbability) =>
-//            wordInClassProbability * generalClasProbability
-//        }
-//      }
+
+      //      {
+      //        val rawInputTextSplit = cleanedDoc.cleanedText.split(" ")
+      //
+      //        val tfIdfs = useTfIdf match {
+      //          case true => Some(TfIdfHelper.calculate(rawInputTextSplit).resultTfIdfs)
+      //          case false => None
+      //        }
+      //
+      //        val inputText = useTfIdf match {
+      //          case true => rawInputTextSplit.distinct
+      //          case false => rawInputTextSplit
+      //        }
+      //
+      //        val classWiseProbabilities = zipped.map {
+      //          case (totalWordsClass, individualWordCountMap) => {
+      //
+      //            inputText.map { word => {
+      //              val tfIdfForWord = tfIdfs.isDefined match {
+      //                case true => tfIdfs.get.getOrElse(word, 1.0)
+      //                case false => 1.0
+      //              }
+      //
+      //              tfIdfForWord * (individualWordCountMap.getOrElse(word, 0.0) +
+      //                1.0) / (totalWordsClass + vocabularySize)
+      //            }
+      //            }
+      //          }
+      //        }
+      //
+      //        classWiseProbabilities.map(_.product).zip(probabilityPerClass).map {
+      //          case (wordInClassProbability, generalClasProbability) =>
+      //            wordInClassProbability * generalClasProbability
+      //        }
+      //      }
       override val name: String = "naive_bayes_tfidf"
     }
   )

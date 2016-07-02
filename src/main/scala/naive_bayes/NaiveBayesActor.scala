@@ -33,6 +33,5 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
       bayesAlgorithm.models.foreach{ model =>
         master ! ModelFinished(model)
       }
-
   }
 }
