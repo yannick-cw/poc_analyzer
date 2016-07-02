@@ -1,7 +1,7 @@
 package tf_idf
 
-import elasicsearch_loader.Queries.{CleanedDoc, Hit}
-import naive_bayes.BayesModel.{Class, Doc, Word}
+import elasicsearch_loader.Queries.Hit
+import naive_bayes.BayesModel.{Doc, Word}
 
 
 case class DocumentCorpus(

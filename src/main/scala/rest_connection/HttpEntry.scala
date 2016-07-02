@@ -22,7 +22,7 @@ import scala.concurrent.duration._
 case class ClassifyRequest(algorithm: String, text: String)
 case class ClassifyResult(algorithm: String, rep: Double, dem: Double)
 case class RawText(text: String)
-case class CleanedText(cleanedText: List[String])
+case class CleanedText(cleanedText: String)
 
 trait Service extends Protocols with HttpRequester {
   implicit val system: ActorSystem

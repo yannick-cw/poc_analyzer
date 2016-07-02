@@ -7,7 +7,6 @@ import elasicsearch_loader.Queries.Hit
 import naive_bayes.NaiveBayesActor
 import naive_bayes.NaiveBayesActor.ModelFinished
 import rest_connection.VerificationActor.{EvalResult, ValidateAlgoRoute}
-import wekaTests.{FeatureBuilder, WekaActor}
 import weka_bag_of_words.WekaBagOfWordsActor
 
 import scala.util.Random._
@@ -23,17 +22,15 @@ object VerificationActor {
   case class EvalResult(expected: String, originalMessage: String, correct: Boolean)
 }
 
-class VerificationActor extends Actor with FeatureBuilder {
+class VerificationActor extends Actor {
   val elasticLoader = context.actorOf(LoadActor.props(self))
   val bayesActor = context.actorOf(NaiveBayesActor.props(self))
-  val wekaActor = context.actorOf(WekaActor.props(self))
   val wekaBagOfWords = context.actorOf(WekaBagOfWordsActor.props(self))
 
   def receive: Receive = {
     case ValidateAlgoRoute(algo, testDataPercent) => elasticLoader ! StartImport()
       algo match {
         case "bayes" => context become createModel(bayesActor, testDataPercent)
-        case "weka" => context become createModel(wekaActor, testDataPercent)
         case "weka_bag_of_words" => context become createModel(wekaBagOfWords, testDataPercent)
       }
   }

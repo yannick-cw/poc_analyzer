@@ -39,8 +39,6 @@ class WekaBagOfWordsAlgorithms(hits: List[Hit]) {
     trainData.add(train)
   }
 
-  println("instance is done")
-
   def stringToWordFilter: StringToWordVector = {
     val filter = new StringToWordVector()
     filter.setStemmer(null)
@@ -58,7 +56,7 @@ class WekaBagOfWordsAlgorithms(hits: List[Hit]) {
     classifier
   }
 
-  lazy val models: List[Future[Model]] = List(
+  val models: List[Future[Model]] = List(
     Future( new Model {
       val classifier = createFilterClassifier(new BayesNet())
       override def classify(inputText: CleanedDoc, useTfIdf: Boolean = false): Seq[Double] = classifyWithClassifier(inputText, classifier)
