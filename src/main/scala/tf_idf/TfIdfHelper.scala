@@ -62,7 +62,6 @@ object TfIdfHelper {
     }
 
     updateIDFs()
-      println(s"idfs = ${documentCorpus.idfsForWords.mkString(",")}")
     TfIdfResult(calculateTfIdfForClass)
 
   }
