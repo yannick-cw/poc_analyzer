@@ -42,7 +42,6 @@ class BayesModel(classes: Class*) extends Model {
   // danger of out of memory here, maybe .par
   private val perClassWordAppearance = classes.map(getPerWordCount)
   println(s"model has ${perClassWordAppearance.head.size + perClassWordAppearance.tail.head.size} distinct words in both rep and dem")
-  println("done with model")
 
   def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
     val inputText = cleanedDoc.cleanedText.split(" ")

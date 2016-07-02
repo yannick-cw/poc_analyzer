@@ -12,7 +12,6 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import elasicsearch_loader.LoadActor.StartImport
 import naive_bayes.NaiveBayesActor.{ClassificationResult, TestInput}
-import rest_connection.VerificationActor.ValidateAlgoRoute
 import spray.json._
 import utils.{HttpRequester, Protocols, Settings}
 
@@ -22,7 +21,7 @@ import scala.concurrent.duration._
 case class ClassifyRequest(algorithm: String, text: String)
 case class ClassifyResult(algorithm: String, rep: Double, dem: Double)
 case class RawText(text: String)
-case class CleanedText(cleanedText: List[String])
+case class CleanedText(cleanedText: String)
 
 trait Service extends Protocols with HttpRequester {
   implicit val system: ActorSystem
@@ -66,7 +65,7 @@ object AkkaHttpMicroservice extends App with Service {
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
   val verify = system.actorOf(VerificationActor.props)
-//  master ! StartImport()
-  verify ! ValidateAlgoRoute("weka_bag_of_words", 5)
+  master ! StartImport()
+//  verify ! ValidateAlgoRoute("weka_bag_of_words", 5)
   Http().bindAndHandle(classify, "0.0.0.0", 9675)
 }

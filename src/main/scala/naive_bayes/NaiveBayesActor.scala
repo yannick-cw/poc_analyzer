@@ -12,7 +12,7 @@ import utils.Model
 object NaiveBayesActor {
   def props(master: ActorRef) = Props(new NaiveBayesActor(master))
   case class DocsToModel(docs: List[CleanedDoc])
-  case class TestInput(algorithm: String, textList: List[String], originalText: String)
+  case class TestInput(algorithm: String, textList: String, originalText: String)
   case class ClassificationResult(repProb: Double, demProb: Double)
   case class ModelFinished(model: Model)
 }
@@ -28,6 +28,7 @@ class NaiveBayesActor(master: ActorRef) extends Actor {
       val (democrats, republican) = hits.partition(_._index == "dem")
       val getWords: (CleanedDoc => List[String]) = doc => doc.cleanedText.split(" ").toList
       val model = BayesModel(republican.map(_._source).map(getWords), democrats.map(_._source).map(getWords))
+      println("own naive bayes is done")
 
       master ! ModelFinished(model)
   }

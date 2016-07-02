@@ -1,14 +1,13 @@
 package rest_connection
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, Props}
 import elasicsearch_loader.LoadActor
 import elasicsearch_loader.LoadActor.{FinishedImport, StartImport}
 import elasicsearch_loader.Queries.CleanedDoc
-import naive_bayes.{BayesModel, NaiveBayesActor}
+import naive_bayes.NaiveBayesActor
 import naive_bayes.NaiveBayesActor.{ClassificationResult, ModelFinished, TestInput}
-import tf_idf.TfIdfActor
 import utils.Model
-import wekaTests.{WekaActor, WekaModel}
+import weka_bag_of_words.WekaBagOfWordsActor
 
 /**
   * Created by Yannick on 23.05.16.
@@ -21,8 +20,9 @@ object MasterActor {
 class MasterActor extends Actor {
   val elasticLoader = context.actorOf(LoadActor.props(self))
   val bayesActor = context.actorOf(NaiveBayesActor.props(self))
-  val tfIdfActor = context.actorOf(TfIdfActor.props(self))
-  val weka = context.actorOf(WekaActor.props(self))
+  val wekaActor = context.actorOf(WekaBagOfWordsActor.props(self))
+
+  val minUpvotes: Int = 20
 
   def receive: Receive = {
     case start@StartImport(_, _) => elasticLoader ! start
@@ -30,15 +30,18 @@ class MasterActor extends Actor {
   }
 
   def working(models: Map[String, Model]): Receive = {
-    case finishedImport: FinishedImport =>
-      bayesActor ! finishedImport
-    //      tfIdfActor ! finishedImport
-    //      weka ! finishedImport
+    case FinishedImport(index, docType, hits) =>
+      println(s"allowing docs with min $minUpvotes upvotes")
+      val filteredHits = FinishedImport(index, docType, hits.filter(_._source.ups > minUpvotes))
+      println(s"using ${filteredHits.hits.size} docs total")
+      bayesActor ! filteredHits
+      wekaActor ! filteredHits
+
     case ModelFinished(model) => context become working(models.updated(model.name, model))
 
     case testInput@TestInput(algorithm, text, originalText) =>
       sender ! models.get(algorithm).map { model =>
-        val classRes = model.classify(CleanedDoc("", 0, originalText, text.mkString(" ")))
+        val classRes = model.classify(CleanedDoc("", 0, originalText, text))
         ClassificationResult(classRes.head, classRes.tail.head)
       }.getOrElse(ClassificationResult(0, 0))
   }
