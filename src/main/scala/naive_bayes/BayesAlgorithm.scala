@@ -70,7 +70,6 @@ class BayesAlgorithm(classes: Class*) {
         new Model {
             override def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
                 val inputText = cleanedDoc.cleanedText.split(" ")
-                println("2 " + inputText.mkString(", "))
                 val tfIdfs = TfIdfHelper.calculate(inputText).resultTfIdfs
 
                 val classWiseProbabilities = zipped.map {
