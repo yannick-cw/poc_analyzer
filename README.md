@@ -4,6 +4,20 @@ This is a project by Yannick Gladow and Simon Wanner.
 The goal is to correctly classify text data to political opinion based on data from reddit.
 
 ## The Idea
+
+![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/sanders.png "sanders-twitter")
+
+How cool would it be to just type in the twitter username `berniesanders` into a textfield
+and get this
+```javascript
+//actual results from poc
+{
+    "dem": 0.7148484082739541,
+    "rep": 0.28515159172604543
+}
+```
+
+Well thats what we thought.  
 What if you could predict the political opinion of a person automatically by just looking at the posts he does in social media?   
 This was the question, which lead to our idea, to classify text to different political groups.  
 We considered doing it for the German political spectrum but than decided to try to differentiate between republicans and democrats, for the simple reason, that there are huge amounts of data available for US politics.  
@@ -87,6 +101,9 @@ The Frontend is build with the [play frameworke](https://www.playframework.com/)
 ```
 The twitter linker gives the opportunity to the user to analyze twitter users's political opinion.  
 In the frontend the username can be specified and then all recent posts of the twitter account are analyzed and the resulting political opinion displayed.
+
+Therefore the twitter linker has to crawl all recent posts of the input user. This is
+implemented using the [twitter4s](https://github.com/DanielaSfregola/twitter4s) library. 
 
 #### More Technologies used
 To make it easy to deploy this everywhere, each service can be run in a [docker](https://www.docker.com/) container.  
