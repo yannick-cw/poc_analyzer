@@ -53,6 +53,10 @@ The seconds mode of operation is the validation phase. There each model is build
 #### [The Frontend](https://github.com/yannick-cw/poc_frontend)  
 The Frontend is build with the [play frameworke](https://www.playframework.com/) and his main job is to send the user requests to the backend and display the results.
 
+#### [The twitter linker](https://github.com/yannick-cw/poc_twitter_linker)
+The twitter linker gives the opportunity to the user to analyze twitter users's political opinion.  
+In the frontend the username can be specified and then all recent posts of the twitter account are analyzed and the resulting political opinion displayed.
+
 #### More Technologies used
 To make it easy to deploy this everywhere, each service can be run in a [docker](https://www.docker.com/) container.  
 The whole stack is running on an [AWS](https://aws.amazon.com) instance with 16Gbyte of RAM and 8 cores.  
