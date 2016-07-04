@@ -36,7 +36,7 @@ class MasterActor extends Actor {
       println(s"allowing docs with min $minUpvotes upvotes")
       val filteredHits = FinishedImport(index, docType, hits.filter(_._source.ups > minUpvotes))
       println(s"using ${filteredHits.hits.size} docs total")
-        TfIdfHelper.updateData(hits)
+//        TfIdfHelper.updateData(hits)
       bayesActor ! filteredHits
       wekaActor ! filteredHits
 
