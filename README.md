@@ -31,16 +31,19 @@ or this `tppatriots` (teaparty patriots)
 ```
 
 Well thats what we thought.  
+Find out if your new date is secretly a radical Trump supporter?  
+Or your boss has the same policial views as you?
+
 What if you could predict the political opinion of a person automatically by just looking at the posts he does in social media?   
 
 This was the question, which lead to our idea, to classify text to different political groups.    
 
 So we created a website where you can    
-1.  put in any text and classify it to an democratic or republican political opinion  
-2. link to a twitter account and classify this account to an democratic or republican political opinion
+1. put in any text and classify it to democrats or republican  
+2. link to a twitter account and classify this account to democrats or republicans 
 
 We considered doing it for the German political spectrum but than decided to try to differentiate between republicans and democrats, for the simple reason, that there are huge amounts of data available for US politics.  
-As source for data we considered using twitter, but decided to go for [reddit](http://reddit.com), because it is easier to find labeled training data there.
+As source for data we thought about using twitter, but decided to go for [reddit](http://reddit.com), because it is easier to find labeled training data there.
 ## The Data
 Reddit is a huge datasource for labeled data, there are millions of posts to almost every existing topic. 
 And these posts are upvoted or downvoted by other users of the site. 
@@ -61,7 +64,7 @@ For our project we extracted posts from the following subreddits.
 - [/AskTrumpSupporters](http://reddit.com/r/AskTrumpSupporters)
 - [/The_Donald](http://reddit.com/r/The_Donald)
 
-From these two groups we gathered over 7Gbyte of raw json files containing roughly 4.000.000 distinct text documents, labeled with upvotes.
+From these two groups we gathered over 7GByte of raw json files containing roughly 4.000.000 distinct text documents, labeled with upvotes.
 
 ## The Software Architecture
 We wanted to implement this project in a highly modular microservice fashion.  
@@ -126,7 +129,7 @@ implemented using the [twitter4s](https://github.com/DanielaSfregola/twitter4s) 
 
 #### More Technologies used
 To make it easy to deploy this everywhere, each service can be run in a [docker](https://www.docker.com/) container.  
-The whole stack is running on an [AWS](https://aws.amazon.com) instance with 16Gbyte of RAM and 8 cores.  
+The whole stack is running on an [AWS](https://aws.amazon.com) instance with 16GByte of RAM and 8 cores.  
 For classification the machine learning library [weka](http://www.cs.waikato.ac.nz/ml/weka/) is used.
 
 ![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/pocStructure.png "Architecture")
