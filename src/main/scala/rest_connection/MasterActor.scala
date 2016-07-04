@@ -10,6 +10,8 @@ import tf_idf.TfIdfHelper
 import utils.Model
 import weka_bag_of_words.WekaBagOfWordsActor
 
+import scala.util.Random._
+
 /**
   * Created by Yannick on 23.05.16.
   */
@@ -33,12 +35,18 @@ class MasterActor extends Actor {
 
   def working(models: Map[String, Model]): Receive = {
     case FinishedImport(index, docType, hits) =>
+      val minUpvotes: Int = 20
       println(s"allowing docs with min $minUpvotes upvotes")
-      val filteredHits = FinishedImport(index, docType, hits.filter(_._source.ups > minUpvotes))
-      println(s"using ${filteredHits.hits.size} docs total")
+      val (dem, rep) = hits
+        .filter(_._source.ups >= minUpvotes)
+        .partition(_._index == "dem")
+
+      val allData = dem.zip(rep).flatten(tuple => List(tuple._1, tuple._2))
+      println(s"using ${allData.size} docs total")
 //        TfIdfHelper.updateData(hits)
-      bayesActor ! filteredHits
-      wekaActor ! filteredHits
+      val finishedImport: FinishedImport = FinishedImport(index, docType, allData)
+      bayesActor ! finishedImport
+      wekaActor ! finishedImport
 
     case ModelFinished(model) => context become working(models.updated(model.name, model))
 
