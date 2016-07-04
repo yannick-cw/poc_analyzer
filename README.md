@@ -10,8 +10,7 @@ The goal is to correctly classify text data to political opinion based on data f
 
 ![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/sanders.png "sanders-twitter")
 
-How cool would it be to just type in the twitter username `berniesanders` into a textfield:
-and get this
+How cool would it be to just type in the twitter username `berniesanders` into a textfield and get this
 ```javascript
 //actual results from poc
 {
@@ -22,11 +21,10 @@ and get this
 
 ![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/tea.png "tea twitter")
 
-or this
+or this `tppatriots` (teaparty patriots)
 ```javascript
 //actual results from poc
 {
-    "algorithm": "bayes_multinomial",
     "dem": 0.3883405523132041,
     "rep": 0.6116594476867955
 }
@@ -37,8 +35,8 @@ What if you could predict the political opinion of a person automatically by jus
 
 This was the question, which lead to our idea, to classify text to different political groups.    
 
-So we created a website where you can  
-1.  put in any text and classify it to an democratic or republican political opinion
+So we created a website where you can    
+1.  put in any text and classify it to an democratic or republican political opinion  
 2. link to a twitter account and classify this account to an democratic or republican political opinion
 
 We considered doing it for the German political spectrum but than decided to try to differentiate between republicans and democrats, for the simple reason, that there are huge amounts of data available for US politics.  
