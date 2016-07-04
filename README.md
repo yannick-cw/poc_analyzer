@@ -1,7 +1,7 @@
 # The Political Opinion Classifier
 
 This is a project by Yannick Gladow and Simon Wanner.
-The goal is to correctly classify political opinion based on data from reddit.
+The goal is to correctly classify text data to political opinion based on data from reddit.
 
 ## The Idea
 What if you could predict the political opinion of a person automatically by just looking at the posts he does in social media?   
@@ -32,28 +32,59 @@ From these two groups we gathered over 7Gbyte of raw json files containing rough
 
 ## The Software Architecture
 We wanted to implement this project in a highly modular microservice fashion.  
-As language we decided to go with [scala](http://www.scala-lang.org/), because it for us it seemed to be the optimal fit for working with BigData and Machine Learning. 
+As language we decided to go with [scala](http://www.scala-lang.org/), because for us it seemed to be the optimal fit for working with BigData and Machine Learning. 
+Furthermore we tried to keep away from any blocking operations and comply to the [reactive manifesto](http://www.reactivemanifesto.org/)
 
 First we extracted the json data from reddit with the help of a python [script](https://github.com/peoplma/subredditarchive).  
 After that the data is processed through multiple microservices, each communicating via a REST api.
   
-#### [The Importer](https://github.com/yannick-cw/poc-importer)  
-The importer reads in the json files from a directory and then processes them in a streaming fashion.  First it is desirialized into an internal object representation, than it is sanitized, grouped into bulks and finally stored to an [elasticsearch](https://www.elastic.co/products/elasticsearch) database.
+#### [The Importer](https://github.com/yannick-cw/poc-importer)    
+The importer reads in the json files from a directory and then processes them in a streaming fashion. 
+ First each post from the parent post is is desirialized into an internal object representation, than it is sanitized, grouped into bulks and finally stored to an [elasticsearch](https://www.elastic.co/products/elasticsearch) database running in a docker container.
 
 #### [The Cleaner](https://github.com/yannick-cw/poc_cleaner)  
+`endpoint: /clean    `
+```javascript
+//input
+{ "text" : "text to clean" }
+//output
+{ "cleanedText" : "after cleaning "}
+```
 The cleaner accepts http requests containing a text and gives back a text without stopwords and all words are stemmed with an implementation of the [Porter-Stemmer-Algorithm](https://de.wikipedia.org/wiki/Porter-Stemmer-Algorithmus).   
 Furthermore relics from URL encoding are removed.
 #### [The Analyzer](https://github.com/yannick-cw/poc_analyzer)
+`endpoint: /classify`
+```javascript
+//input
+{
+	"algortihm" : "algorithm to use",
+	"text" : "text to classify"
+}
+//output
+//with probabilities for rep and dem
+{
+	"algorithm" : "algorithm used",
+	"rep" : 0.5,
+	"dem" : 0.5
+}
+```
 The Analyzer is the heart of the whole project.   
-Firstly it reads in the labeled texts from the [elasticsearch](https://www.elastic.co/products/elasticsearch) database.  
+First it reads in the labeled texts from the [elasticsearch](https://www.elastic.co/products/elasticsearch) database.  
 After that multiple models are build with the classification algorithms that we chose.  
-When the models are ready, it accepts http requests containing an algorithm name and a text and tries to classify this text. Therefore the input text is first cleaned up by the Cleaner mircorservice and then classified by the selected algorithm.  
+When the models are ready, it accepts http requests containing an algorithm name and a text and tries to classify this text.
+ Therefore the input text is first send to the Cleaner mircorservice and then classified by the selected algorithm.  
 
 The seconds mode of operation is the validation phase. There each model is build and tested against a specified percentage of the input data. The input data is randomly distributed into test and train data.
+
+The internal structure is based on the [Akka](http://akka.io/) Actor model.
 #### [The Frontend](https://github.com/yannick-cw/poc_frontend)  
 The Frontend is build with the [play frameworke](https://www.playframework.com/) and his main job is to send the user requests to the backend and display the results.
 
 #### [The twitter linker](https://github.com/yannick-cw/poc_twitter_linker)
+`endpoint /classifyUser`
+```javascript
+{ "username" : "the twitter username" }
+```
 The twitter linker gives the opportunity to the user to analyze twitter users's political opinion.  
 In the frontend the username can be specified and then all recent posts of the twitter account are analyzed and the resulting political opinion displayed.
 
@@ -93,6 +124,62 @@ We considered the following algorithms, because they all seemed to create good r
 
 All algorithms used are from the weka library, besides one version of naive bayes,  which we implemented ourselves.
 
+#### Our naive bayes implementation
+###### the model building
+```scala
+// Here classes are dem and rep with the input text documents
+class BayesAlgorithm(classes: Class*) {
+    //min times each word has to appear
+    private val minWordAppearance: Int = 0
+
+    //number of docs in class divided by number of all docs
+    private val probabilityPerClass =
+        classes.map(_class => _class.size.toDouble / classes.flatten.size.toDouble)
+
+    //all distinct words from input texts
+    private val vocabularySize = classes.flatten.flatten.distinct.size.toDouble
+
+    //words in classes dem and rep
+    private val wordsPerClass = classes.map(_.flatten.size)
+
+    //function that maps the words to their count
+    private val getPerWordCount: (Class) => Map[Word, Double] = _class => {
+        _class.flatten
+          .groupBy(identity)
+          .mapValues(_.length.toDouble)
+          .filter(_._2 >= minWordAppearance)
+    }
+
+    //creates maps for rep and dems each containing the count per word
+    private val perClassWordAppearance = classes.map(getPerWordCount)
+   
+    //zip the map with the overall size of rep and dems
+    private val zipped = wordsPerClass.zip(perClassWordAppearance)
+}
+```
+###### the classification
+```scala
+override def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
+               
+     //create list of words
+     val inputText = cleanedDoc.cleanedText.split(" ")
+     val zipped = wordsPerClass.zip(perClassWordAppearance)
+
+     val classWiseProbabilities = zipped
+                  .map { case (totalWordsClass, individualWordCountMap) => inputText
+                    //replace each word with the appearance in class and add balance factor 1
+                    .map { word => (individualWordCountMap.getOrElse(word, 0.0) + 1.0) / (totalWordsClass + vocabularySize) }
+                  }
+
+     classWiseProbabilities            
+                  //multiply each word probability
+                  .map(_.product)
+                  //zip with general class probability
+                  .zip(probabilityPerClass)
+                  //mulitply with general class probability
+                  .map { case (wordInClassProbability, generalClasProbability) => wordInClassProbability * generalClasProbability }
+            }
+```
 ## The Classification Results
 For classification we decided to limit our dataset to posts with more than 20 upvotes. This provided us with the best results since the posts where obviously accepted in their community.  
 This restricted the ~4.000.000 input documents to nearly 400.000 texts.  
