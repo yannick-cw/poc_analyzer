@@ -34,7 +34,7 @@ Well thats what we thought.
 Find out if your new date is secretly a radical Trump supporter?  
 Or your boss has the same policial views as you?
 
-What if you could predict the political opinion of a person automatically by just looking at the posts he does in social media?   
+What if you could predict the political opinion of a person automatically by just looking at their posts on social media? 
 
 This was the question, which lead to our idea, to classify text to different political groups.    
 
@@ -42,7 +42,7 @@ So we created a website where you can
 1. put in any text and classify it to democrats or republican  
 2. link to a twitter account and classify this account to democrats or republicans 
 
-We considered doing it for the German political spectrum but than decided to try to differentiate between republicans and democrats, for the simple reason, that there are huge amounts of data available for US politics.  
+We considered doing it for the German political spectrum, but  decided to try to differentiate between republicans and democrats, for the simple reason, that there are huge amounts of data available for US politics.  
 As source for data we thought about using twitter, but decided to go for [reddit](http://reddit.com), because it is easier to find labeled training data there.
 ## The Data
 Reddit is a huge datasource for labeled data, there are millions of posts to almost every existing topic. 
@@ -72,11 +72,11 @@ As language we decided to go with [scala](http://www.scala-lang.org/), because f
 Furthermore we tried to keep away from any blocking operations and comply to the [reactive manifesto.](http://www.reactivemanifesto.org/)
 
 First we extracted the json data from reddit with the help of a python [script](https://github.com/peoplma/subredditarchive).  
-After that the data is processed through multiple microservices, each communicating via a REST api.
+After that the data is processed through multiple microservices, each communicating via a REST API.
   
 #### [The Importer](https://github.com/yannick-cw/poc-importer)    
 The importer reads in the json files from a directory and then processes them in a streaming fashion with [Akka Streams](http://doc.akka.io/docs/akka/2.4.7/scala/stream/index.html). 
- First each post from the parent post is is desirialized into an internal object representation, than it is sanitized, grouped into bulks and finally stored to an [elasticsearch](https://www.elastic.co/products/elasticsearch) database running in a docker container.
+ First each post from the parent post is is deserialized into an internal object representation, than it is sanitized, grouped into bulks and finally stored to an [elasticsearch](https://www.elastic.co/products/elasticsearch) database running in a docker container.
 
 #### [The Cleaner](https://github.com/yannick-cw/poc_cleaner)  
 `endpoint: /clean    `
@@ -106,8 +106,8 @@ Furthermore relics from URL encoding are removed.
 ```
 The Analyzer is the heart of the whole project.   
 First it reads in the labeled texts from the [elasticsearch](https://www.elastic.co/products/elasticsearch) database.  
-After that multiple models are build with the classification algorithms that we chose.  
-When the models are ready, it accepts http requests containing an algorithm name and a text and tries to classify this text.
+After that multiple models are built with the classification algorithms that we chose.  
+When the models are ready, it accepts http requests containing an algorithm name and a text and tries to classify the given text.
  Therefore the input text is first send to the Cleaner mircorservice and then classified by the selected algorithm.  
 
 The seconds mode of operation is the validation phase. There each model is build and tested against a specified percentage of the input data. The input data is randomly distributed into test and train data.
@@ -121,8 +121,8 @@ The Frontend is build with the [play frameworke](https://www.playframework.com/)
 ```javascript
 { "username" : "the twitter username" }
 ```
-The twitter linker gives the opportunity to the user to analyze twitter users's political opinion.  
-In the frontend the username can be specified and then all recent posts of the twitter account are analyzed and the resulting political opinion displayed.
+The twitter linker provides a service to analyze twitter users's political opinion based on their tweets.The twitter linker gives the opportunity to the user to analyze twitter users's political opinion.  
+In the frontend the username can be specified and then all recent posts of the twitter account are analyzed and the resulting political opinion is displayed.
 
 Therefore the twitter linker has to crawl all recent posts of the input user. This is
 implemented using the [twitter4s](https://github.com/DanielaSfregola/twitter4s) library. 
@@ -146,7 +146,7 @@ One approach was to build a feature vector containing of:
 - average uppercase letters used
 - average word length
 
-From this approach we learned, that it does not work at all. All these features, combined or individually, where distributed very event between the political parties.  
+From this approach we learned, that it does not work at all. All these features, combined or individually, where distributed very even between the political parties.  
 
 So we decided to classify with the [bag of words approach](https://en.wikipedia.org/wiki/Bag-of-words_model).  
 Furthermore we also tried to use n-grams but found no improvement in the classification results.
@@ -220,7 +220,7 @@ override def classify(cleanedDoc: CleanedDoc): Seq[Double] = {
             }
 ```
 ## The Classification Results
-For classification we decided to limit our dataset to posts with more than 20 upvotes. This provided us with the best results since the posts where obviously accepted in their community.  
+For classification we decided to limit our dataset to posts with more than 20 upvotes. This provided us with the best results since the posts where obviously accepted by their community.  
 This restricted the ~4.000.000 input documents to nearly 400.000 texts.  
 We randomly distributed this data to 95% train and 5% test data.
 If not stated differently our own sanitization was used.
@@ -241,12 +241,13 @@ If not stated differently our own sanitization was used.
 |  naive bayes, no sanitization | 52%  |
 
 ### Conclusion and algorithms used
+The most important observation from these results was, that our own naive bayes implementation was the best and fastest by far. This has probably to do with the fact, that we could make use of parallel execution and fit the algorithm exactly to our needs.  
 
-Important observations from these results for us where first of all, that our own naive bayes implementation was the best and fastest by far. This hast probably to do with the fact, that we could make use of parallel execution and fit the algorithm exactly to our problem.  
+One more interesting result was, that the model building process for support vector machines, j48 tree and SVM for text data took more than 12 hours. So we decided that they are not practically for our approach, because we want faster startup times. 
 
-One more interesting result was, that the model building process for support vector machines, j48 tree and SVM for text data took more than 12 hours. So we decided that they are not practically for our approach, because we want faster startup times.
+In the end performance wise and by looking at the classification results we chose to use our naive bayes implementation, the bayes net, the k-nearest neighbors and the bayes multinomial for text data algorithms in our running project.
 
-So performance wise and from the classification results we chose to use our naive bayes implementation, the bayes net, the k-nearest neighbors and the bayes multinomial for text data algorithms in our running project.
+
 
 
 
