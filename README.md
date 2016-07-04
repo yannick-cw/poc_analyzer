@@ -69,13 +69,13 @@ From these two groups we gathered over 7GByte of raw json files containing rough
 ## The Software Architecture
 We wanted to implement this project in a highly modular microservice fashion.  
 As language we decided to go with [scala](http://www.scala-lang.org/), because for us it seemed to be the optimal fit for working with BigData and Machine Learning. 
-Furthermore we tried to keep away from any blocking operations and comply to the [reactive manifesto](http://www.reactivemanifesto.org/)
+Furthermore we tried to keep away from any blocking operations and comply to the [reactive manifesto.](http://www.reactivemanifesto.org/)
 
 First we extracted the json data from reddit with the help of a python [script](https://github.com/peoplma/subredditarchive).  
 After that the data is processed through multiple microservices, each communicating via a REST api.
   
 #### [The Importer](https://github.com/yannick-cw/poc-importer)    
-The importer reads in the json files from a directory and then processes them in a streaming fashion. 
+The importer reads in the json files from a directory and then processes them in a streaming fashion with [Akka Streams](http://doc.akka.io/docs/akka/2.4.7/scala/stream/index.html). 
  First each post from the parent post is is desirialized into an internal object representation, than it is sanitized, grouped into bulks and finally stored to an [elasticsearch](https://www.elastic.co/products/elasticsearch) database running in a docker container.
 
 #### [The Cleaner](https://github.com/yannick-cw/poc_cleaner)  
