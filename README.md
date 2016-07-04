@@ -4,10 +4,13 @@ This is a project by Yannick Gladow and Simon Wanner.
 The goal is to correctly classify text data to political opinion based on data from reddit.
 
 ## The Idea
+>It is said that if you know your enemies and know yourself, you will not be imperiled in a hundred battles; if you do not know your enemies but do know yourself, you will win one and lose one; if you do not know your enemies nor yourself, you will be imperiled in every single battle.
+
+-- <cite>Sun Tzu</cite>
 
 ![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/sanders.png "sanders-twitter")
 
-How cool would it be to just type in the twitter username `berniesanders` into a textfield
+How cool would it be to just type in the twitter username `berniesanders` into a textfield:
 and get this
 ```javascript
 //actual results from poc
@@ -17,9 +20,27 @@ and get this
 }
 ```
 
+![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/tea.png "tea twitter")
+
+or this
+```javascript
+//actual results from poc
+{
+    "algorithm": "bayes_multinomial",
+    "dem": 0.3883405523132041,
+    "rep": 0.6116594476867955
+}
+```
+
 Well thats what we thought.  
 What if you could predict the political opinion of a person automatically by just looking at the posts he does in social media?   
-This was the question, which lead to our idea, to classify text to different political groups.  
+
+This was the question, which lead to our idea, to classify text to different political groups.    
+
+So we created a website where you can  
+1.  put in any text and classify it to an democratic or republican political opinion
+2. link to a twitter account and classify this account to an democratic or republican political opinion
+
 We considered doing it for the German political spectrum but than decided to try to differentiate between republicans and democrats, for the simple reason, that there are huge amounts of data available for US politics.  
 As source for data we considered using twitter, but decided to go for [reddit](http://reddit.com), because it is easier to find labeled training data there.
 ## The Data
