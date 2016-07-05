@@ -168,8 +168,9 @@ Therefore the overall probability for C<sub>k</sub> is multiplied with the produ
 ###### [bayes net](https://en.wikipedia.org/wiki/Bayesian_network)
 The bayesian network builds on the bayes theorem and creates a probabilistic directed acyclic graph.
 ######  [mulinomial naive bayes](https://en.wikipedia.org/wiki/Naive_Bayes_classifier#Multinomial_naive_Bayes)
-We use two different implementations of the multinomial naive bayes.
-1. the normal version [multinomial](http://weka.sourceforge.net/doc.dev/weka/classifiers/bayes/NaiveBayesMultinomial.html)
+We use two different implementations of the multinomial naive bayes.  
+
+1. the normal version [multinomial](http://weka.sourceforge.net/doc.dev/weka/classifiers/bayes/NaiveBayesMultinomial.html)  
 2. and the version especially for text classification [multinomial text](http://weka.sourceforge.net/doc.dev/weka/classifiers/bayes/NaiveBayesMultinomialText.html)   
 
 
