@@ -17,12 +17,17 @@ import spray.json._
 import utils.{HttpRequester, Protocols, Settings}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 case class ClassifyRequest(algorithm: String, text: String)
+case class ClassifyBulk(algorithm: String, texts: List[String])
 case class ClassifyResult(algorithm: String, rep: Double, dem: Double)
+case class BulkResult(results : List[ClassifyResult])
 case class RawText(text: String)
+case class BulkRaw(text: List[String])
 case class CleanedText(cleanedText: String)
+case class CleanedBulk(cleanedText: List[String])
 
 trait Service extends Protocols with HttpRequester {
   implicit val system: ActorSystem
@@ -30,7 +35,8 @@ trait Service extends Protocols with HttpRequester {
   val settings: Settings
   val master: ActorRef
 
-  val classify = path("classify") {
+  val classify =
+    path("classify") {
       (post & entity(as[ClassifyRequest])) { request =>
 
         implicit val timeout = Timeout(5.seconds)
@@ -50,12 +56,39 @@ trait Service extends Protocols with HttpRequester {
 
         complete {
           classifyResult.map[ToResponseMarshallable] {
-            case ClassificationResult(rep, dem) => ClassifyResult(request.algorithm, rep, dem).toJson
+            case ClassificationResult(rep, dem) =>
+              println("rep:" + rep)
+              println("dem:" + dem)
+              ClassifyResult(request.algorithm, rep, dem).toJson
           }
         }
 
       }
-    }
+    } ~
+  path("classifyBulk") {
+    (post & entity(as[ClassifyBulk])) { request =>
+
+      implicit val timeout = Timeout(5.seconds)
+
+      val bulkRaw = BulkRaw(request.texts)
+      val req = RequestBuilding.Post("/cleanBulk", entity = HttpEntity(ContentTypes.`application/json`, bulkRaw.toJson.compactPrint))
+      val futureCleaningRes = futureHttpResponse(req ,settings.cleaning.host, settings.cleaning.port)
+
+      val futureTestInputs = for {
+        cleanedTexts <- futureCleaningRes
+        testInputs <- Unmarshal(cleanedTexts).to[CleanedBulk].map(cts => cts.cleanedText.map(ct => TestInput(request.algorithm, ct, "")))
+      } yield testInputs
+
+      val futureClassifyResults = futureTestInputs
+        .flatMap(testInputs => Future.sequence(testInputs
+          .map(testInput => master.ask(testInput)(4 seconds)
+          .mapTo[ClassificationResult])))
+
+      val futureBulkRes = futureClassifyResults.map(res => BulkResult(res.map(cRes => ClassifyResult(request.algorithm, cRes.repProb, cRes.demProb))))
+
+      complete(futureBulkRes)
+      }
+  }
 }
 
 
