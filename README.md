@@ -8,7 +8,7 @@ The goal is to correctly classify text data to political opinion based on data f
 
 -- <cite>Sun Tzu</cite>
 
-![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/sanders.png "sanders-twitter")
+![structure](https://raw.githubusercontent.com/yannick-cw/poc_analyzer/master/sanders.png "sanders-twitter")
 
 How cool would it be to just type in the twitter username `berniesanders` into a textfield and get this
 ```javascript
@@ -19,7 +19,7 @@ How cool would it be to just type in the twitter username `berniesanders` into a
 }
 ```
 
-![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/tea.png "tea twitter")
+![structure](https://raw.githubusercontent.com/yannick-cw/poc_analyzer/master/tea.png "tea twitter")
 
 or this `tppatriots` (teaparty patriots)
 ```javascript
@@ -132,7 +132,7 @@ To make it easy to deploy this everywhere, each service can be run in a [docker]
 The whole stack is running on an [AWS](https://aws.amazon.com) instance with 16GByte of RAM and 8 cores.  
 For classification the machine learning library [weka](http://www.cs.waikato.ac.nz/ml/weka/) is used.
 
-![structure](https://github.com/yannick-cw/poc_analyzer/blob/master/pocStructure.png "Architecture")
+![structure](https://raw.githubusercontent.com/yannick-cw/poc_analyzer/master/pocStructure.png "Architecture")
 
 
 ## The Algorithms considered
