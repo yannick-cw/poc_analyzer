@@ -153,13 +153,43 @@ Furthermore we also tried to use n-grams but found no improvement in the classif
 
 We considered the following algorithms, because they all seemed to create good results for text classification.
 
-- [naive bayes](https://en.wikipedia.org/wiki/Naive_Bayes_classifier)
-- [bayes net](https://en.wikipedia.org/wiki/Bayesian_network)
-- [mulinomial naive bayes](https://en.wikipedia.org/wiki/Naive_Bayes_classifier#Multinomial_naive_Bayes)
-- [support vector machine](https://en.wikipedia.org/wiki/Support_vector_machine)
-- [j48 tree](https://en.wikipedia.org/wiki/C4.5_algorithm)
-- [k-nearest neighbors](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm)
-- [support vector machine for text data](http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/SGDText.html)
+###### [naive bayes](https://en.wikipedia.org/wiki/Naive_Bayes_classifier)
+The naive bayes classification is a standard procedure for text classification and so we chose to use this algorithm as the baseline for further explorations.
+
+Naive bayes algorithms are based on the Bayes theorem and view each attribute from the featurevector as independent.  
+The main idea is, that it calculates the probabilities of the input text for being in each class.  
+Technical it looks like this:  
+![structure](https://wikimedia.org/api/rest_v1/media/math/render/svg/9dd841d7c36e6d7449bea439ef99e8138810870d "class prop")  
+Here the probability for input vector x<sub>1</sub>,...,x<sub>n</sub> belonging to class C<sub>k</sub> is calculated.  
+Therefore the overall probability for C<sub>k</sub> is multiplied with the product of each probability for x<sub>i</sub> being in C<sub>k</sub>. In the end the Class with the highest probability is selected.
+
+
+
+ ###### [bayes net](https://en.wikipedia.org/wiki/Bayesian_network)
+The bayesian network builds on the bayes theorem and creates a probabilistic directed acyclic graph.
+######  [mulinomial naive bayes](https://en.wikipedia.org/wiki/Naive_Bayes_classifier#Multinomial_naive_Bayes)
+We use two different implementations of the multinomial naive bayes.
+1. the normal version [multinomial](http://weka.sourceforge.net/doc.dev/weka/classifiers/bayes/NaiveBayesMultinomial.html)
+2. and the version especially for text classification [multinomial text](http://weka.sourceforge.net/doc.dev/weka/classifiers/bayes/NaiveBayesMultinomialText.html)   
+
+
+The difference of the used multinomial bayes classifiers to the naive bayes classifier is that it uses a multinomial distribution instead of the normal distribution.
+
+######  [support vector machine](https://en.wikipedia.org/wiki/Support_vector_machine)
+Support vector machines try to separate the data points in two classes. Therefore it tries to find the linear function keeping maximal distance to objects of each of the classes.
+![structure](https://upload.wikimedia.org/wikipedia/commons/1/1b/Kernel_Machine.png "kernel trick")
+
+With the kernel trick the multidimensional feature space is mapped to two dimensions and linear classification is possible.
+######  [j48 tree](https://en.wikipedia.org/wiki/C4.5_algorithm)
+j48 is an implementation of the C4.5 algorithm, a decision tree.  
+It uses information entropy to split up the feature vector of the training data to create nodes in the tree. 
+######  [k-nearest neighbors](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm)
+k-nearest neighbors has no model building phase. The whole algorithm is lazy evaluated. Meaning the calculation happens after the training phase, when actual data comes in.  
+The new incoming data point is compared to its k nearest neighbors and then classified, usually according to the majority class of its neighbors.  
+
+![structure](https://upload.wikimedia.org/wikipedia/commons/e/e7/KnnClassification.svg "knn")
+
+--------------------------------------
 
 All algorithms used are from the weka library, besides one version of naive bayes,  which we implemented ourselves.
 
@@ -245,8 +275,24 @@ The most important observation from these results was, that our own naive bayes 
 
 One more interesting result was, that the model building process for support vector machines, j48 tree and SVM for text data took more than 12 hours. So we decided that they are not practically for our approach, because we want faster startup times. 
 
-In the end performance wise and by looking at the classification results we chose to use our naive bayes implementation, the bayes net, the k-nearest neighbors and the bayes multinomial for text data algorithms in our running project.
+In the end performance wise and by looking at the classification results we chose to use our naive bayes implementation, the bayes net, the k-nearest neighbors and the bayes multinomial for text data algorithms in our running project.  
+Thereby we provide some diversity in results and the user decides which algorithm to trust.  
 
+
+Altogether we are really happy with almost 80% correct classified data, the first tries ended in the 60% area and we tweaked a lot of parameters to get this 20% increase.
+
+### Future Ideas
+##### Add more Input possibilities
+It would be very interesting to also include Facebook posts or texts from different social media sited. Furthermore twitter and facebook data could also be used to train the models.
+##### Improve classification through user response
+Another improvement would be to have a back channel from the user.  
+The user could say if the classification seems to be correct and the model could be continually trained to create better results.
+
+##### Run multiple algorithms in sequence to improve results
+One way to push the correct classified percentage over 80% could be to include multiple algorithms in a single classification.
+Unfortunately there was no time left to implement this feature.
+##### Allow generic classes to classify to
+In the long run we could imagine to allow generic classes, not only democrats or republicans. There would only be small changes necessary to achieve that, because most of the code is already build to allow any classes.
 
 
 
