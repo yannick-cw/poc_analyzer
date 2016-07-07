@@ -1,7 +1,7 @@
 package rest_connection
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.event.Logging
+import akka.event.{Logging, LoggingAdapter}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
@@ -35,7 +35,7 @@ trait Service extends Protocols with HttpRequester {
   implicit val materializer: ActorMaterializer
   val settings: Settings
   val master: ActorRef
-  val logger = Logging.getLogger(system, this)
+  val logger: LoggingAdapter
 
   val classify =
     path("classify") {
@@ -100,6 +100,7 @@ trait Service extends Protocols with HttpRequester {
 object AkkaHttpMicroservice extends App with Service {
   implicit val system = ActorSystem("classify-system")
   implicit val materializer = ActorMaterializer()
+  val logger = Logging.getLogger(system, this)
 
   val settings = Settings(system)
   val master = system.actorOf(MasterActor.props)
