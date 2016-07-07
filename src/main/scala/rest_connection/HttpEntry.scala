@@ -88,7 +88,7 @@ trait Service extends Protocols with HttpRequester {
 
       val futureBulkRes = futureClassifyResults.map(res => BulkResult(res.map(cRes => ClassifyResult(request.algorithm, cRes.repProb, cRes.demProb))))
       futureBulkRes.onSuccess{
-        case res => logger.info(s"classified twitter account with:  ${res.results.mkString(" ")} ")
+        case res => logger.info(s"classified ${res.results.size} twitter accounts")
       }
 
       complete(futureBulkRes)
