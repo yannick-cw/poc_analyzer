@@ -51,7 +51,6 @@ class MasterActor extends Actor {
     case ModelFinished(model) => context become working(models.updated(model.name, model))
 
     case testInput@TestInput(algorithm, text, originalText) =>
-        println(testInput)
       sender ! models.get(algorithm).map { model =>
         val classRes = model.classify(CleanedDoc("", 0, originalText, text))
         ClassificationResult(classRes.head, classRes.tail.head)
